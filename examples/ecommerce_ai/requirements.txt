@@ -1,0 +1,14 @@
+# E-Commerce AI Intelligence System
+# AxiomPy and dependencies
+
+# Core
+axiompy>=0.1.0
+
+# Database
+sqlite3  # stdlib
+
+# Optional: AI Providers (uncomment as needed)
+# ollama  # For local Ollama (install separately: https://ollama.ai)
+# openai  # For OpenAI API
+# anthropic  # For Anthropic API
+

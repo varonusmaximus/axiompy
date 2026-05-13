@@ -1,0 +1,49 @@
+# Ignore macOS system files
+.DS_Store
+
+
+# Ignore Python cache files and directories
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Ignore coverage report folder
+htmlcov/
+.coverage
+
+# Ignore log files and directories
+logs/
+*.log
+
+# Ignore virtual environment directories
+venv/
+.env/
+*.env
+env/
+
+# Ignore downloaded ML models (large files) when developing axiompy-agents locally
+axiompy/agents/models/*
+!axiompy/agents/models/README.md
+
+.tmpvenv/
+.ci-venv/
+
+PR_*.md
+LOGGING_*.md
+api.db
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+tfplan
+
+# Terraform secrets (use terraform.tfvars.example as template)
+terraform.tfvars
+*.tfvars
+!*.tfvars.example
+test_data/

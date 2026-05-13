@@ -1,0 +1,48 @@
+# Development dependencies for the axiompy core repo.
+#
+# Typical setup:
+#   pip install -r requirements-dev.txt
+#   pip install -e ".[dev,servers,databases,storage,http,http-async]"
+#
+# The editable install brings ruff and other [dev] extras from pyproject.toml.
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.0
+
+# Formatting / lint (also in pyproject [project.optional-dependencies].dev)
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.4.0
+
+# HTTP / sync client tests
+requests>=2.28.0
+
+# File I/O and logging tests
+pyyaml>=6.0
+tqdm>=4.65.0
+
+# Database tests
+psycopg2-binary>=2.9.0
+mysql-connector-python>=8.0.0
+boto3>=1.26.0
+
+# Object storage tests
+google-cloud-storage>=2.10.0
+azure-storage-blob>=12.19.0
+
+# Server tests (FastAPI / Flask)
+flask>=3.0.0
+fastapi>=0.104.0
+uvicorn>=0.24.0
+httpx>=0.25.0
+
+# Secrets integration tests
+cerberus-client>=0.3.0
+hvac>=1.1.0
+azure-keyvault-secrets>=4.7.0
+azure-identity>=1.13.0
+
+# AWS mocking
+moto>=4.2.0

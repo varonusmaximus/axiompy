@@ -1,0 +1,32 @@
+[MAIN]
+# Disable warnings that are intentional design choices:
+# R0903: too-few-public-methods - Valid for Protocol classes, validators, dataclasses
+# R0913: too-many-arguments - Some functions legitimately need more args
+# R0917: too-many-positional-arguments - Same as above
+# C0415: import-outside-toplevel - Intentional lazy imports for optional dependencies
+# W0718: broad-exception-caught - Intentional catch-all for error handling
+# W0212: protected-access - Sometimes needed for implementation patterns
+# R0801: duplicate-code - Some code patterns are intentionally similar
+# R0902: too-many-instance-attributes - Some classes need many attributes
+# C0302: too-many-lines - Large modules are sometimes necessary
+# W0707: raise-missing-from - Often raises are intentional as-is
+# W0611: unused-import - Sometimes imports are for type hints or lazy loading
+# E0401: import-error - Optional dependencies might not be installed
+# W0107: unnecessary-pass - Sometimes pass is needed for empty abstract methods
+# W0221: arguments-differ - Intentional in some subclasses
+# W0222: signature-differs - Intentional in some subclasses
+# W0231: super-init-not-called - Sometimes intentional for composition
+# W0719: broad-exception-raised - Sometimes needed for generic errors
+# R0912: too-many-branches - Complex logic sometimes necessary
+# R1705: no-else-return - Style preference
+# E0611: no-name-in-module - Optional dependencies
+# I1101: c-extension-no-member - Optional dependencies without type stubs
+disable=R0903,R0913,R0917,C0415,W0718,W0212,R0801,R0902,C0302,W0707,W0611,E0401,W0107,W0221,W0222,W0231,W0719,R0912,R1705,E0611,I1101
+
+[FORMAT]
+max-line-length=100
+
+[DESIGN]
+max-args=10
+max-attributes=15
+

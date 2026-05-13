@@ -1,0 +1,26 @@
+# Optional runtime dependencies for axiompy (core).
+#
+# Prefer installing from PyPI with extras (matches pyproject.toml):
+#   pip install axiompy
+#   pip install "axiompy[databases,storage,servers,http,http-async,yaml,tqdm]"
+#
+# This file lists common optional stacks for environments that still use
+# requirements.txt for pinning. Core axiompy has no mandatory third-party deps.
+
+# --- File / logging helpers (axiompy.io.file, loggers) ---
+pyyaml>=6.0
+tqdm>=4.65.0
+
+# --- SQL validation (axiompy.validators) ---
+sqlparse>=0.4.0
+
+# --- Database drivers (axiompy.io.database) ---
+psycopg2-binary>=2.9.0
+mysql-connector-python>=8.0.0
+boto3>=1.26.0
+
+# --- Object storage (axiompy.io.object) ---
+google-cloud-storage>=2.10.0
+azure-storage-blob>=12.19.0
+
+# Data engineering (axiompy.data) lives in the axiompy-data distribution — not this repo.

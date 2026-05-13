@@ -1,0 +1,16 @@
+---
+description: Collect required fields when user asks to create a Jira issue
+globs: python/jira-mcp/**/*
+alwaysApply: false
+---
+
+# Jira Issue Creation
+
+When the user asks to create a Jira issue (e.g. "create a jira issue", "create an issue in Jira"), **collect these from the user before calling create_issue**:
+
+1. **Project Code** — e.g. `DAIENGEX` (ask if not provided)
+2. **Summary** — Short title for the issue (required)
+3. **Description** — Issue body/details (required)
+4. **Component(s)** — One or more of: **Bug Fix**, **Discovery**, **Feature**, **Maintenance**, **Refactoring** (required for DAIENGEX)
+
+If the user omits any of these, ask for them. Then call the `create_issue` MCP tool with the collected values. Use `component_names` for components (e.g. `["Discovery"]`).

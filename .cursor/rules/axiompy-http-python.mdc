@@ -1,0 +1,19 @@
+---
+description: Enforce AxiomPy HTTP client for Python code
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# AxiomPy-First HTTP (Python)
+
+Use `axiompy.io.http` as the default outbound HTTP abstraction in Python code.
+
+- Prefer `HTTPClientFactory.create(...)` and `RetryConfig` over direct `requests` usage.
+- Do not introduce new direct `import requests` in application/runtime modules unless there is a documented blocker.
+- If a temporary exception is needed, add a short inline rationale and a follow-up task to migrate.
+- Keep timeout/retry/auth/header behavior centralized in AxiomPy HTTP client wrappers.
+
+## Allowed exceptions
+
+- Test-only mocking or fixture code where direct request exceptions are intentionally simulated.
+- Third-party SDK constraints where AxiomPy wrappers cannot be applied directly yet.
