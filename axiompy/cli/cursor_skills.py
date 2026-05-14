@@ -52,11 +52,7 @@ def _axiompy_version() -> str:
 
 def list_skills(bundle: Path) -> list[str]:
     """Return sorted skill directory names found in the bundle."""
-    return sorted(
-        p.name
-        for p in bundle.iterdir()
-        if p.is_dir() and (p / "SKILL.md").exists()
-    )
+    return sorted(p.name for p in bundle.iterdir() if p.is_dir() and (p / "SKILL.md").exists())
 
 
 def sync_skills(

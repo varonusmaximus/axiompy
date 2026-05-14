@@ -10,6 +10,8 @@ from pathlib import Path
 # Add parent to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
+from axiompy.reasoning import ReasoningFactory
+from axiompy.reasoning.agents import QueryAgent
 from ecommerce.config.settings import (
     AI_MODEL,
     AI_PROVIDER,
@@ -21,8 +23,6 @@ from ecommerce.config.settings import (
 from ecommerce.services.ecommerce_service import EcommerceService
 
 from axiompy.io.database import DatabaseFactory, DatabaseSettings, DatabaseType
-from axiompy.reasoning import ReasoningFactory
-from axiompy.reasoning.agents import QueryAgent
 
 
 def demo_ecommerce_reasoning():

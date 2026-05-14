@@ -11,4 +11,3 @@ sqlite3  # stdlib
 # ollama  # For local Ollama (install separately: https://ollama.ai)
 # openai  # For OpenAI API
 # anthropic  # For Anthropic API
-

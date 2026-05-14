@@ -44,7 +44,7 @@ response = openai.ChatCompletion.create(
     model="gpt-4",
     messages=[{"role": "user", "content": "What's my account balance?"}]
 )
-# Response: "I don't have access to your account information. 
+# Response: "I don't have access to your account information.
 #           Please log in to your bank's website..."
 ```
 
@@ -218,10 +218,10 @@ Think of it like this:
 
 MCP solves a critical problem in AI development: **how do you safely give language models the ability to take actions?**
 
-✅ **Safety**: Tools are explicitly registered and validated  
-✅ **Control**: You decide exactly what capabilities agents have  
-✅ **Integration**: Connect agents to any system or API  
-✅ **Standardization**: Works across different AI platforms  
+✅ **Safety**: Tools are explicitly registered and validated
+✅ **Control**: You decide exactly what capabilities agents have
+✅ **Integration**: Connect agents to any system or API
+✅ **Standardization**: Works across different AI platforms
 ✅ **Transparency**: Agents must explicitly call tools (no hidden behavior)
 
 #### Real-World Analogy
@@ -349,12 +349,12 @@ if using_openai:
     from openai_specific import setup_tools
     openai_tools = [...]
     # 150 lines of OpenAI-specific code
-    
+
 elif using_google:
     from google_specific import setup_tools
     google_tools = [...]
     # 150 lines of Google-specific code
-    
+
 elif using_anthropic:
     from anthropic_specific import setup_tools
     anthropic_tools = [...]
@@ -372,7 +372,7 @@ from axiompy.servers import MCPServerFactory, MCPServerType, MCPServerSettings
 # Define Acme's tools ONCE
 def setup_example_tools(server):
     """Acme's agent tools - defined once, works everywhere"""
-    
+
     # Data access tools
     server.register_tool(
         "query_inventory",
@@ -380,14 +380,14 @@ def setup_example_tools(server):
         "Query product availability by SKU, location, size",
         tags=["data", "inventory"]
     )
-    
+
     server.register_tool(
         "get_customer_profile",
         get_customer_data,
         "Get customer purchase history and preferences",
         tags=["data", "customer"]
     )
-    
+
     # Service tools
     server.register_tool(
         "get_recommendation",
@@ -395,14 +395,14 @@ def setup_example_tools(server):
         "Get personalized product recommendations",
         tags=["service", "ai"]
     )
-    
+
     server.register_tool(
         "optimize_pricing",
         pricing_engine,
         "Optimize pricing based on demand and inventory",
         tags=["service", "pricing"]
     )
-    
+
     # Action tools
     server.register_tool(
         "send_offer",
@@ -450,7 +450,7 @@ Customer on Acme App:
         │
         └─→ Call MCP Tool: send_offer(customer_id, recommendations)
             └─→ Acme Customer Platform: Personalized offers
-        
+
         ▼
 ┌─────────────────────────────────────────────┐
 │ Result: Personalized recommendations        │
@@ -820,7 +820,7 @@ def setup_agent_tools(server_type):
     """Setup same tools for any framework"""
     settings = MCPServerSettings(name="Tools")
     server = MCPServerFactory.create(server_type, settings)
-    
+
     # Register same tools regardless of framework
     server.register_tool(
         "fetch_user",
@@ -829,18 +829,18 @@ def setup_agent_tools(server_type):
         parameters={"user_id": {"type": "int"}},
         return_type="dict"
     )
-    
+
     return server
 
 # Works identically with all frameworks
 for platform in [MCPServerType.OPENAI, MCPServerType.GOOGLE_ADK, MCPServerType.ANTHROPIC]:
     server = setup_agent_tools(platform)
     server.initialize()
-    
+
     session = server.create_session(f"{platform.value}_agent")
     result = server.execute_tool("fetch_user", session, user_id=123)
     print(f"{platform.value}: {result}")
-    
+
     server.shutdown()
 ```
 
@@ -853,13 +853,13 @@ from axiompy.servers import MCPServer, MCPServerSettings, MCPServerError, MCPToo
 class MockMCPServer(MCPServer):
     def initialize(self):
         pass
-    
+
     def execute_tool(self, tool_name, session, **kwargs):
         tool = self.get_tool(tool_name)
         if not tool:
             raise MCPToolError(f"Tool '{tool_name}' not found")
         return tool.execute(**kwargs)
-    
+
     def shutdown(self):
         pass
 
@@ -918,7 +918,7 @@ MCPReasoningMiddleware (Wrapper)
     ├─ Context-aware sequencing
     ├─ Tracks execution costs & data flow
     └─ Delegates to base server
-    
+
 Local LLM (Ollama)
     ├─ mistral (fast, recommended)
     ├─ llama2 (powerful)
@@ -1054,7 +1054,7 @@ Required data: [customer, discount]
 Already executed: [get_customer_profile, apply_discount]
 Available data: [customer, discount, inventory]
 
-LLM Response: "YES. All prerequisites met. Customer data and discount 
+LLM Response: "YES. All prerequisites met. Customer data and discount
 calculated. Ready to send offer."
 ```
 
@@ -1678,11 +1678,11 @@ from axiompy.servers import Server, ServerSettings
 
 class MockServer(Server):
     """Mock server for testing without HTTP overhead."""
-    
+
     def __init__(self, settings=None):
         super().__init__(settings or ServerSettings())
         self.routes = []
-        
+
     def route(self, path, methods=None, **kwargs):
         def decorator(handler):
             self.routes.append({
@@ -1692,19 +1692,19 @@ class MockServer(Server):
             })
             return handler
         return decorator
-    
+
     def add_middleware(self, middleware, **kwargs):
         pass
-    
+
     def run(self, host=None, port=None, **kwargs):
         pass
-    
+
     def get_app(self):
         return None
-    
+
     def _cleanup(self):
         pass
-    
+
     # Helper for testing
     def call_route(self, path, method="GET", **kwargs):
         for route in self.routes:
@@ -1719,14 +1719,14 @@ class MockServer(Server):
 def test_user_api():
     # Arrange
     mock_server = MockServer()
-    
+
     @mock_server.route("/users/<int:user_id>", methods=["GET"])
     def get_user(user_id: int):
         return {"id": user_id, "name": f"User {user_id}"}
-    
+
     # Act
     result = mock_server.call_route("/users/<int:user_id>", "GET", user_id=123)
-    
+
     # Assert
     assert result["id"] == 123
     assert result["name"] == "User 123"
@@ -1740,15 +1740,15 @@ from axiompy.servers import ServerFactory, ServerType, ServerSettings
 def test_flask_api():
     settings = ServerSettings()
     server = ServerFactory.create(ServerType.FLASK, settings)
-    
+
     @server.route("/health")
     def health():
         return {"status": "healthy"}
-    
+
     # Get Flask test client
     app = server.get_app()
     client = app.test_client()
-    
+
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json["status"] == "healthy"
@@ -1763,15 +1763,15 @@ from axiompy.servers import ServerFactory, ServerType, ServerSettings
 def test_fastapi_api():
     settings = ServerSettings()
     server = ServerFactory.create(ServerType.FASTAPI, settings)
-    
+
     @server.route("/health")
     def health():
         return {"status": "healthy"}
-    
+
     # Get FastAPI test client
     app = server.get_app()
     client = TestClient(app)
-    
+
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json()["status"] == "healthy"
@@ -1788,29 +1788,29 @@ from axiompy.servers import Server
 
 class UserAPI:
     """Application that works with any server framework."""
-    
+
     def __init__(self, server: Server):
         self.server = server
         self.users = {}
         self._next_id = 1
         self._setup_routes()
-    
+
     def _setup_routes(self):
         self.server.route("/users", methods=["GET"])(self.list_users)
         self.server.route("/users", methods=["POST"])(self.create_user)
         self.server.route("/users/<int:user_id>", methods=["GET"])(self.get_user)
         self.server.route("/users/<int:user_id>", methods=["PUT"])(self.update_user)
         self.server.route("/users/<int:user_id>", methods=["DELETE"])(self.delete_user)
-    
+
     def list_users(self):
         return {"users": list(self.users.values())}
-    
+
     def get_user(self, user_id: int):
         user = self.users.get(user_id)
         if not user:
             return {"error": "User not found"}, 404
         return user
-    
+
     def create_user(self, data: dict):
         user = {
             "id": self._next_id,
@@ -1820,19 +1820,19 @@ class UserAPI:
         self.users[self._next_id] = user
         self._next_id += 1
         return user, 201
-    
+
     def update_user(self, user_id: int, data: dict):
         if user_id not in self.users:
             return {"error": "User not found"}, 404
-        
+
         user = self.users[user_id]
         user.update(data)
         return user
-    
+
     def delete_user(self, user_id: int):
         if user_id not in self.users:
             return {"error": "User not found"}, 404
-        
+
         del self.users[user_id]
         return {"message": "User deleted"}
 
@@ -1857,20 +1857,20 @@ from axiompy.io.database import Database
 
 class ProductService:
     """Service with database and server dependencies."""
-    
+
     def __init__(self, server: Server, database: Database):
         self.server = server
         self.db = database
         self._setup_routes()
-    
+
     def _setup_routes(self):
         self.server.route("/products", methods=["GET"])(self.list_products)
         self.server.route("/products/<int:id>", methods=["GET"])(self.get_product)
-    
+
     def list_products(self):
         products = self.db.get_all("products")
         return {"products": products}
-    
+
     def get_product(self, id: int):
         product = self.db.get("products", id)
         if not product:
@@ -1974,10 +1974,10 @@ class UserRepository:
         self.server = server
         self.db = db
         self._setup_routes()
-    
+
     def _setup_routes(self):
         self.server.route("/users")(self.list_users)
-    
+
     def list_users(self):
         # Business logic here
         return self.db.get_all("users")
@@ -2022,7 +2022,7 @@ def get_user(user_id: int):
 def test_user_service():
     mock_server = MockServer()
     service = UserService(mock_server)
-    
+
     # Test business logic without HTTP overhead
     result = mock_server.call_route("/users", "GET")
     assert "users" in result
@@ -2142,11 +2142,11 @@ class CustomServer(Server):
     def __init__(self, settings: ServerSettings):
         super().__init__(settings)
         # Initialize your framework
-    
+
     def route(self, path, methods=None, **kwargs):
         # Implement route registration
         pass
-    
+
     # Implement other abstract methods...
 
 # Register
@@ -2270,10 +2270,10 @@ service = MCPToolService(
 class ToolRoutes:
     def __init__(self, service: MCPToolService):
         self.service = service
-    
+
     async def list_tools(self):
         return self.service.list_tools()
-    
+
     async def execute(self, tool_name: str, params: dict):
         return self.service.execute_tool(tool_name, params)
 
@@ -2477,7 +2477,7 @@ mcp_server = MCPServerFactory.create(
 
 # Register DevOps tools (tools layer)
 mcp_server.register_tool(
-    "deploy", 
+    "deploy",
     lambda service, version: f"Deployed {service}:{version}",
     "Deploy service"
 )
@@ -2504,10 +2504,10 @@ service = MCPToolService(
 # Step 4: Create route handlers with dependency injection + ROP
 class DevOpsRoutes:
     """DevOps API routes with service layer and ROP error handling."""
-    
+
     def __init__(self, service: MCPToolService):
         self.service = service
-    
+
     async def deploy(self, service_name: str, version: str):
         """Deploy endpoint - returns Result for ROP."""
         try:
@@ -2518,7 +2518,7 @@ class DevOpsRoutes:
             return Ok(result)
         except Exception as e:
             return Err(f"Deployment failed: {str(e)}")
-    
+
     async def health(self, service_name: str):
         """Health check endpoint - returns Result."""
         try:
@@ -2770,7 +2770,7 @@ class JSONRPCClient:
     def __init__(self, url: str):
         self.url = url
         self.request_id = 0
-    
+
     def call(self, method: str, params: dict = None) -> dict:
         self.request_id += 1
         response = requests.post(self.url, json={
@@ -2887,4 +2887,3 @@ Part of the AxiomPy library. See main README for license information.
 ---
 
 **Last Updated:** 2025-12-05
-

@@ -238,7 +238,7 @@ def get_database_password() -> str:
     client = SecretsClientFactory.create(
         SecretsClientType.CERBERUS, settings
     ).unwrap()
-    
+
     return client.get_secret("db_password").unwrap()
 ```
 
@@ -388,12 +388,12 @@ from typing import Dict, List, Optional, Any
 class MockSecretClient(SecretClient):
     def __init__(self, secrets: Dict[str, str]):
         self.secrets = secrets
-    
+
     def get_secret(self, secret_path: str) -> Result[str, str]:
         if secret_path in self.secrets:
             return Ok(self.secrets[secret_path])
         return Err(f"Secret not found: {secret_path}")
-    
+
     # ... implement other methods ...
 
 # Use in tests
@@ -520,14 +520,14 @@ from axiompy.secrets import CredentialProvider, SecretsClientFactory, SecretsCli
 class MyAPIServer:
     def __init__(self):
         self.secrets_client = None
-    
+
     def startup(self):
         """Initialize secrets client on server startup."""
         settings = ...  # Your settings
         self.secrets_client = SecretsClientFactory.create(
             SecretsClientType.CERBERUS, settings
         ).unwrap()
-    
+
     def get_secret_client(self) -> CredentialProvider:
         """Access secrets client during request handling."""
         return self.secrets_client
@@ -556,10 +556,10 @@ class SecretsConfig:
     @staticmethod
     def get_client() -> Result:
         """Get configured secret client based on environment."""
-        
+
         backend = os.getenv("SECRET_BACKEND", "cerberus").upper()
         client_type = SecretsClientType[backend]
-        
+
         # Backend-specific settings using match/case (Python 3.10+)
         match client_type:
             case SecretsClientType.CERBERUS:
@@ -584,7 +584,7 @@ class SecretsConfig:
                 )
             case _:
                 raise ValueError(f"Unknown backend: {client_type}")
-        
+
         return SecretsClientFactory.create(client_type, settings)
 
 # Use as singleton
@@ -607,13 +607,13 @@ from axiompy.secrets import CredentialProvider
 class APIRoutes:
     def __init__(self, secrets_client: CredentialProvider):
         self.secrets = secrets_client
-    
+
     async def call_external_api(self):
         token = (
             self.secrets.get_auth_token("service/token")
             .unwrap_or_else(lambda err: raise_error(err))
         )
-        
+
         headers = {"Authorization": str(token)}
         response = await client.get("https://api.example.com/", headers=headers)
         return response
@@ -626,10 +626,10 @@ from axiompy.secrets import CredentialProvider
 class DatabaseService:
     def __init__(self, secrets_client: CredentialProvider):
         self.secrets = secrets_client
-    
+
     def connect_to_database(self):
         cred = self.secrets.get_database_credentials("db/mysql").unwrap()
-        
+
         db = Database(
             host="localhost",
             user=cred.username,
@@ -645,12 +645,12 @@ from axiompy.secrets import CredentialProvider
 class AzureAuthenticator:
     def __init__(self, secrets_client: CredentialProvider):
         self.secrets = secrets_client
-    
+
     def authenticate(self):
         cred = self.secrets.get_credential("azure/service-principal").unwrap()
-        
+
         from azure.identity import ClientSecretCredential
-        
+
         auth = ClientSecretCredential(
             tenant_id=cred.metadata.get("tenant_id"),
             client_id=cred.username,
@@ -697,7 +697,7 @@ from axiompy.result import Ok, Err
 class MockSecretClient(SecretsClient):
     def __init__(self, secrets: dict):
         self.secrets = secrets
-    
+
     def get_secret(self, path: str):
         if path in self.secrets:
             return Ok(self.secrets[path])
@@ -823,21 +823,21 @@ from axiompy.secrets import SecretsClientFactory, SecretsClientType, YourSetting
 
 class TestYourBackend:
     """Test your new backend implementation."""
-    
+
     def test_basic_operation(self):
         """Test basic get/put operations."""
         with mock_aws():  # or mock_your_service()
             # Create settings
             settings = YourSettings(region="us-east-1")
-            
+
             # Create client
             result = SecretsClientFactory.create(SecretsClientType.YOUR_BACKEND, settings)
             client = result.unwrap()
-            
+
             # Test operation
             result = client.put_secret("test", "value")
             assert result.is_ok()
-            
+
             # Verify retrieval
             result = client.get_secret("test")
             assert result.is_ok()
@@ -1150,4 +1150,3 @@ Same factory. Same `get_secret()` calls. Same key names. Different backend.
 ---
 
 **Last Updated:** 2026-04-08
-

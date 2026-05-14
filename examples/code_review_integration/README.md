@@ -21,17 +21,17 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install axiompy
         run: pip install git+https://github.com/varonusmaximus/axiompy.git
-      
+
       - name: Run AI Code Review
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -56,30 +56,30 @@ def main():
     # Get PR info from GitHub Actions environment
     pr_number = int(os.environ.get("GITHUB_PR_NUMBER", os.environ.get("PR_NUMBER", "0")))
     repo = os.environ.get("GITHUB_REPOSITORY", "")
-    
+
     if not pr_number or not repo:
         # Try to parse from GITHUB_REF
         ref = os.environ.get("GITHUB_REF", "")
         if "/pull/" in ref:
             pr_number = int(ref.split("/pull/")[1].split("/")[0])
         repo = os.environ.get("GITHUB_REPOSITORY", "")
-    
+
     if not pr_number:
         print("Could not determine PR number")
         sys.exit(1)
-    
+
     owner, repo_name = repo.split("/")
-    
+
     print(f"🔍 Reviewing PR #{pr_number} in {owner}/{repo_name}")
-    
+
     # Create agent - uses GITHUB_TOKEN and OPENAI_API_KEY from env
     agent = CodeReviewAgentFactory.create_from_env(
         rules_repo="varonusmaximus/axiompy"  # Central rules repository
     )
-    
+
     # Run review
     result = agent.review_pr(owner, repo_name, pr_number)
-    
+
     # Print results
     print(f"\n{'='*60}")
     print(f"Score: {result.score}/100")
@@ -87,17 +87,17 @@ def main():
     print(f"Comments: {len(result.comments)}")
     print(f"Approved: {result.approved}")
     print(f"{'='*60}\n")
-    
+
     # Exit with error if critical issues
     if result.has_critical_issues:
         print("❌ FAILED: Critical issues found")
         sys.exit(1)
-    
+
     # Optionally fail on errors too
     # if result.has_errors:
     #     print("⚠️ FAILED: Errors found")
     #     sys.exit(1)
-    
+
     print("✅ Review complete")
 
 if __name__ == "__main__":
@@ -157,7 +157,7 @@ settings = CodeReviewSettings(
     rules_repo="varonusmaximus/axiompy",
     rules_file="AGENTS.md",
     rules_branch="main",
-    
+
     # File filters
     include_patterns=["*.py"],  # Only Python files
     exclude_patterns=[
@@ -165,14 +165,14 @@ settings = CodeReviewSettings(
         "migrations/*",
         "*.generated.py",
     ],
-    
+
     # Behavior
     large_pr_warning_threshold=30,
     very_large_pr_warning_threshold=100,
     post_review_to_github=True,
     fail_on_critical=True,
     fail_on_error=False,
-    
+
     # AI settings
     temperature=0.2,
     max_tokens=2000,
@@ -241,16 +241,16 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ inputs.python_version }}
-      
+
       - run: pip install git+https://github.com/varonusmaximus/axiompy.git
-      
+
       - name: Review PR
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -260,18 +260,18 @@ jobs:
           python -c "
           import os
           from axiompy.agents import CodeReviewAgentFactory
-          
+
           agent = CodeReviewAgentFactory.create_from_env(
               rules_repo=os.environ.get('RULES_REPO')
           )
-          
+
           # Parse GitHub context
           ref = os.environ.get('GITHUB_REF', '')
           pr_number = int(ref.split('/pull/')[1].split('/')[0]) if '/pull/' in ref else 0
           owner, repo = os.environ['GITHUB_REPOSITORY'].split('/')
-          
+
           result = agent.review_pr(owner, repo, pr_number)
-          
+
           print(f'Score: {result.score}/100')
           exit(1 if result.has_critical_issues else 0)
           "
@@ -337,4 +337,3 @@ permissions:
 - **Issues**: [github.com/varonusmaximus/axiompy/issues](https://github.com/varonusmaximus/axiompy/issues)
 - **Documentation**: [axiompy/agents/README.md](../../../axiompy/agents/README.md)
 - **Examples**: This directory
-

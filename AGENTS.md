@@ -47,7 +47,7 @@ When a factory supports multiple implementations (e.g., different backends, prov
 class MyServiceFactory:
     @staticmethod
     def create_for_postgres() -> MyService: ...  # ❌ Don't do this
-    
+
     @staticmethod
     def create_for_mysql() -> MyService: ...     # ❌ Don't do this
 
@@ -61,7 +61,7 @@ class ServiceType(str, Enum):
 
 class MyServiceFactory:
     """Factory for creating MyService instances."""
-    
+
     @staticmethod
     def create(
         service_type: ServiceType,
@@ -69,11 +69,11 @@ class MyServiceFactory:
     ) -> MyService:
         """
         Create a MyService instance.
-        
+
         Args:
             service_type: Type of service to create
             settings: Configuration for the service
-            
+
         Returns:
             Configured MyService instance
         """
@@ -86,7 +86,7 @@ class MyServiceFactory:
                 return SQLiteService(settings)
             case _:
                 raise ValueError(f"Unknown service type: {service_type}")
-    
+
     @staticmethod
     def create_mock() -> MockMyService:
         """Create a mock instance for testing."""
@@ -133,7 +133,7 @@ def _create_embedder(embedder_type, settings):  # ❌ Module-level helper
 # In adapters/embedders/__init__.py:
 class EmbedderFactory:
     """Factory for creating Embedder instances."""
-    
+
     @staticmethod
     def create(
         embedder_type: EmbedderType,
@@ -144,7 +144,7 @@ class EmbedderFactory:
                 return OpenAIEmbedder(...)
             case EmbedderType.FASTEMBED:
                 return FastEmbedEmbedder(...)
-    
+
     @staticmethod
     def create_mock(dimension: int = 384) -> MockEmbedder:
         return MockEmbedder(dimension=dimension)
@@ -152,7 +152,7 @@ class EmbedderFactory:
 # In adapters/vector_stores/__init__.py:
 class VectorStoreFactory:
     """Factory for creating VectorStore instances."""
-    
+
     @staticmethod
     def create(
         store_type: VectorStoreType,
@@ -259,7 +259,7 @@ from axiompy.validators import ensure_url, ensure_in_range
 class MyServiceSettings:
     """
     Configuration for MyService.
-    
+
     Attributes:
         url: Service endpoint URL
         timeout_secs: Request timeout in seconds (default: 30)
@@ -268,7 +268,7 @@ class MyServiceSettings:
     url: str
     timeout_secs: int = 30
     extra_params: Dict[str, Any] = field(default_factory=dict)
-    
+
     def __post_init__(self):
         """Validate settings after initialization."""
         # Let validators throw directly - don't catch and re-raise
@@ -321,11 +321,11 @@ Methods that configure an object should return `self` for chaining:
 def add_header(self, key: str, value: str) -> "MyClient":
     """
     Add a header.
-    
+
     Args:
         key: Header name
         value: Header value
-        
+
     Returns:
         Self for method chaining
     """
@@ -365,7 +365,7 @@ Prefer composition (wrapping) over inheritance:
 class JSONRPCClient:
     def __init__(self, settings):
         self._http_client = HTTPClientFactory.create(...)  # Has-a relationship
-    
+
     def bearer_token(self, token: str) -> "JSONRPCClient":
         self._http_client.bearer_token(token)  # Delegates
         return self
@@ -381,16 +381,16 @@ Provide mock implementations in the same module:
 ```python
 class MockMyService(MyService):
     """Mock implementation for unit testing."""
-    
+
     def __init__(self):
         self.calls: List[Tuple[str, Any]] = []
         self._responses: Dict[str, Any] = {}
-    
+
     def set_response(self, method: str, result: Any) -> "MockMyService":
         """Set predefined response."""
         self._responses[method] = result
         return self
-    
+
     def reset(self) -> None:
         """Reset recorded calls."""
         self.calls.clear()
@@ -502,7 +502,7 @@ class EmailNotificationSender(AbstractNotificationSender):
 # Good - Wait for 3 use cases before abstracting
 # After you have:
 #   1. EmailSender
-#   2. SMSSender  
+#   2. SMSSender
 #   3. PushNotificationSender
 # NOW create the abstraction:
 class NotificationSender(Protocol):
@@ -569,7 +569,7 @@ Subtypes must be substitutable for their base types without breaking behavior.
 class Rectangle:
     def set_width(self, width: int) -> None:
         self._width = width
-    
+
     def set_height(self, height: int) -> None:
         self._height = height
 
@@ -577,7 +577,7 @@ class Square(Rectangle):  # Violates LSP!
     def set_width(self, width: int) -> None:
         self._width = width
         self._height = width  # Unexpected side effect
-    
+
     def set_height(self, height: int) -> None:
         self._height = height
         self._width = height  # Unexpected side effect
@@ -699,7 +699,7 @@ class AbstractFutureProofHandler(ABC):
 
 class ConcreteHandler(AbstractFutureProofHandler):
     def handle(self) -> None: ...
-    
+
 # Only one implementation exists - the abstraction adds no value!
 
 # Good - Build what you need now
@@ -753,12 +753,12 @@ Using the Singleton pattern to ensure only one instance exists. Often misused as
 # Bad - Classic Singleton anti-pattern
 class DatabaseConnection:
     _instance = None
-    
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
-    
+
     def query(self, sql: str) -> list:
         ...
 
@@ -849,14 +849,14 @@ def process(self, data: list) -> None:
 def process(self, data: list) -> None:
     if not data:
         return
-    
+
     for item in data:
         self._process_item(item)
 
 def _process_item(self, item: Item) -> None:
     if not item.valid:
         return
-    
+
     for sub in item.children:
         self._process_subitem(sub)
 
@@ -904,7 +904,7 @@ class UserService:
         if not data.get("name"):
             raise ValueError("Name required")
         # ... more validation
-        
+
 class AdminService:
     def create_admin(self, data: dict) -> Admin:
         # Same validation logic copy-pasted!
@@ -981,17 +981,17 @@ def get_cached(key: str) -> Any:
 # Good - Use dependency injection or class-based approach
 class AppFactory:
     """Factory with instance-level state."""
-    
+
     @staticmethod
     def create() -> App:
         return App()
 
 class CacheService:
     """Service with encapsulated state."""
-    
+
     def __init__(self):
         self._cache: Dict[str, Any] = {}
-    
+
     def get(self, key: str) -> Any:
         return self._cache.get(key)
 
@@ -1004,7 +1004,7 @@ from axiompy.servers import ServerFactory, ServerType, ServerSettings
 server = ServerFactory.create(ServerType.FASTAPI, ServerSettings())
 ```
 
-**How to fix**: 
+**How to fix**:
 - Use dependency injection
 - Use class-based encapsulation
 - Use framework-provided state management (app.state)
@@ -1088,7 +1088,7 @@ def create_user(
 @dataclass
 class Email:
     value: str
-    
+
     def __post_init__(self):
         if "@" not in self.value or "." not in self.value:
             raise ValueError(f"Invalid email: {self.value}")
@@ -1096,7 +1096,7 @@ class Email:
 @dataclass
 class PhoneNumber:
     value: str
-    
+
     def __post_init__(self):
         digits = "".join(c for c in self.value if c.isdigit())
         if len(digits) != 10:
@@ -1236,7 +1236,7 @@ def create_order(
     ...
 ```
 
-**How to fix**: 
+**How to fix**:
 - Group related parameters into dataclasses
 - Use Settings/Config objects
 - Consider Builder pattern for complex construction
@@ -1441,21 +1441,21 @@ def my_function(
 ) -> Dict[str, Any]:
     """
     Brief one-line description.
-    
+
     Longer description if needed, explaining behavior,
     side effects, or important details.
-    
+
     Args:
         param1: Description of param1
         param2: Description of param2 (default: None)
-        
+
     Returns:
         Description of return value
-        
+
     Raises:
         ValueError: When param1 is empty
         ConnectionError: When connection fails
-        
+
     Example:
         >>> result = my_function("test", param2=10)
         >>> print(result)
@@ -1504,12 +1504,12 @@ from unittest.mock import Mock, patch
 
 class TestMyServiceSettings:
     """Tests for MyServiceSettings configuration."""
-    
+
     def test_valid_settings(self):
         """Test creating settings with valid parameters."""
         settings = MyServiceSettings(url="http://localhost", timeout_secs=30)
         assert settings.url == "http://localhost"
-    
+
     def test_invalid_url_raises(self):
         """Test that invalid URL raises ValueError."""
         with pytest.raises(ValueError, match="Invalid"):
@@ -1517,13 +1517,13 @@ class TestMyServiceSettings:
 
 class TestMyService:
     """Tests for MyService."""
-    
+
     @pytest.fixture
     def mock_dependency(self):
         """Create mock dependency."""
         with patch("axiompy.module.DependencyFactory.create") as mock:
             yield mock.return_value
-    
+
     @pytest.fixture
     def service(self, mock_dependency):
         """Create service with mocked dependency."""
@@ -1537,9 +1537,9 @@ def test_with_mock_client():
     """Test using mock client."""
     mock = MyClientFactory.create_mock()
     mock.set_response("method_name", {"result": "value"})
-    
+
     result = mock.call("method_name", {"param": "test"})
-    
+
     assert result == {"result": "value"}
     assert mock.calls == [("method_name", {"param": "test"})]
 ```
@@ -1689,7 +1689,7 @@ pytest tests/test_module.py -v --cov=axiompy.module
 #### 3. Feature Checklists with Emojis
 ```markdown
 - ✅ **Completed Feature**: Description
-- 🚧 **In Progress**: Description  
+- 🚧 **In Progress**: Description
 - 📋 **Planned**: Description
 ```
 
@@ -1781,4 +1781,3 @@ When creating a new module or class, ensure:
 - [ ] No data clumps (extract dataclass)
 - [ ] No long parameter lists (>5 params, use objects)
 - [ ] No shotgun surgery (encapsulate variation)
-

@@ -58,4 +58,3 @@ User:
 - UserConflict (409) - Email or username already taken
 - ValidationError (400) - Invalid input
 ```
-

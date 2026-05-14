@@ -73,7 +73,7 @@ This example demonstrates the core concepts of AxiomPy's reasoning module:
    ```python
    # In main() function, replace:
    ai_client = ReasoningFactory.create(ReasoningProvider.OLLAMA(model="mistral")
-   
+
    # With:
    ai_client = ReasoningFactory.create_openai(
        api_key="sk-your-key-here",
@@ -91,7 +91,7 @@ This example demonstrates the core concepts of AxiomPy's reasoning module:
    ```python
    # In main() function, replace:
    ai_client = ReasoningFactory.create(ReasoningProvider.OLLAMA(model="mistral")
-   
+
    # With:
    ai_client = ReasoningFactory.create_anthropic(
        api_key="sk-ant-your-key-here",
@@ -162,14 +162,14 @@ Step 5: Executing natural language queries...
 class SalesDataService(BaseDatasetService):
     dataset_name = "sales"
     description = "E-commerce Sales Data"
-    
+
     def query(self, sql: str, limit: int = None):
         # Implement query execution
         pass
-    
+
     def get_capabilities(self):
         return ["regional_analysis", "product_analysis", ...]
-    
+
     def get_metadata(self):
         return DatasetMetadata(...)
 ```
@@ -213,7 +213,7 @@ result = agent.execute_query("What are the sales by region?")
 class YourDataService(BaseDatasetService):
     dataset_name = "your_dataset"
     description = "Your Dataset Description"
-    
+
     # Implement required methods
     ...
 
@@ -241,7 +241,7 @@ class RealDataService(BaseDatasetService):
             DatabaseType.SQLITE,
             {"database": "my_database.db"}
         )
-    
+
     def query(self, sql: str, limit: int = None):
         return self.db.execute(sql, limit=limit)
 ```
@@ -362,4 +362,3 @@ For issues or questions:
 ---
 
 **Happy reasoning! 🚀**
-

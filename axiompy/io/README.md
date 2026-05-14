@@ -622,20 +622,20 @@ The database module provides a **consistent, CRUD-based interface** for interact
 ### Supported Databases
 
 - **PostgreSQL** - Full-featured relational database
-- **MySQL** - Popular relational database  
+- **MySQL** - Popular relational database
 - **DynamoDB** - AWS NoSQL database
 - **SQLite** - Lightweight database (built-in, no external dependencies)
 
 ### Key Features
 
-✅ **Minimal Dependencies**: Uses only standard library where possible  
-✅ **No ORM Overhead**: Direct SQL/query execution for maximum control and performance  
-✅ **Intuitive CRUD API**: Simple methods for common operations (get, set, update, delete)  
-✅ **Flexible Execute Method**: Full SQL control when you need it  
-✅ **Automatic Connection Management**: Connects on instantiation, cleans up on destruction  
-✅ **Consistent Interface**: Same API across all database types  
-✅ **Easy Mocking**: Simple to create mock implementations for unit testing  
-✅ **Type Hints**: Full typing support for better IDE integration  
+✅ **Minimal Dependencies**: Uses only standard library where possible
+✅ **No ORM Overhead**: Direct SQL/query execution for maximum control and performance
+✅ **Intuitive CRUD API**: Simple methods for common operations (get, set, update, delete)
+✅ **Flexible Execute Method**: Full SQL control when you need it
+✅ **Automatic Connection Management**: Connects on instantiation, cleans up on destruction
+✅ **Consistent Interface**: Same API across all database types
+✅ **Easy Mocking**: Simple to create mock implementations for unit testing
+✅ **Type Hints**: Full typing support for better IDE integration
 
 ### Database Quick Start
 
@@ -746,8 +746,8 @@ db.update("users", user_id, {"email": "alice.new@example.com"})
 
 # Custom query with PostgreSQL-specific features
 results = db.execute("""
-    INSERT INTO users (name, email) 
-    VALUES (%s, %s) 
+    INSERT INTO users (name, email)
+    VALUES (%s, %s)
     RETURNING id, name, email
 """, ("Bob", "bob@example.com"))
 
@@ -853,25 +853,25 @@ from typing import Any, Dict, List, Optional, Union, Tuple
 
 class MockDatabase(Database):
     """Mock database for testing."""
-    
+
     def __init__(self):
         super().__init__(DatabaseSettings())
         self._data = {}  # Simple in-memory storage
         self._next_id = 1
-    
+
     def _cleanup(self):
         pass
-    
+
     def get(self, table: str, key_value: Any, key_column: str = "id") -> Optional[Dict[str, Any]]:
         table_data = self._data.get(table, {})
         for record in table_data.values():
             if record.get(key_column) == key_value:
                 return record
         return None
-    
+
     def get_all(self, table: str) -> List[Dict[str, Any]]:
         return list(self._data.get(table, {}).values())
-    
+
     def set(self, table: str, data: Dict[str, Any]) -> Any:
         if table not in self._data:
             self._data[table] = {}
@@ -880,14 +880,14 @@ class MockDatabase(Database):
         record = {"id": record_id, **data}
         self._data[table][record_id] = record
         return record_id
-    
+
     def update(self, table: str, key_value: Any, data: Dict[str, Any], key_column: str = "id") -> int:
         record = self.get(table, key_value, key_column)
         if record:
             record.update(data)
             return 1
         return 0
-    
+
     def delete(self, table: str, key_value: Any, key_column: str = "id") -> int:
         table_data = self._data.get(table, {})
         for record_id, record in list(table_data.items()):
@@ -895,7 +895,7 @@ class MockDatabase(Database):
                 del table_data[record_id]
                 return 1
         return 0
-    
+
     def execute(self, sql_string: str, params: Optional[Union[Tuple, Dict]] = None) -> Union[int, List[Dict[str, Any]]]:
         # Simple mock - just return empty for now
         if sql_string.strip().upper().startswith("SELECT"):
@@ -910,22 +910,22 @@ Services should depend on the `Database` interface, not concrete implementations
 ```python
 class UserService:
     """Service that works with ANY Database implementation."""
-    
+
     def __init__(self, database: Database):
         self.db = database  # Depends on interface
-    
+
     def get_user(self, user_id: int):
         return self.db.get("users", user_id)
-    
+
     def create_user(self, name: str, email: str):
         return self.db.set("users", {"name": name, "email": email})
-    
+
     def update_user_email(self, user_id: int, new_email: str):
         return self.db.update("users", user_id, {"email": new_email})
-    
+
     def delete_user(self, user_id: int):
         return self.db.delete("users", user_id)
-    
+
     def find_adults(self):
         return self.db.execute("SELECT * FROM users WHERE age >= ?", (18,))
 ```
@@ -938,11 +938,11 @@ def test_create_and_get_user():
     # Arrange
     mock_db = MockDatabase()
     service = UserService(mock_db)
-    
+
     # Act
     user_id = service.create_user("Alice", "alice@example.com")
     user = service.get_user(user_id)
-    
+
     # Assert
     assert user is not None
     assert user['name'] == 'Alice'
@@ -954,10 +954,10 @@ def test_get_user_not_found():
     # Arrange
     mock_db = MockDatabase()
     service = UserService(mock_db)
-    
+
     # Act
     user = service.get_user(999)
-    
+
     # Assert
     assert user is None
 
@@ -968,11 +968,11 @@ def test_update_user():
     mock_db = MockDatabase()
     service = UserService(mock_db)
     user_id = service.create_user("Bob", "bob@example.com")
-    
+
     # Act
     affected = service.update_user_email(user_id, "bob.new@example.com")
     updated_user = service.get_user(user_id)
-    
+
     # Assert
     assert affected == 1
     assert updated_user['email'] == "bob.new@example.com"
@@ -984,11 +984,11 @@ def test_delete_user():
     mock_db = MockDatabase()
     service = UserService(mock_db)
     user_id = service.create_user("Charlie", "charlie@example.com")
-    
+
     # Act
     affected = service.delete_user(user_id)
     user = service.get_user(user_id)
-    
+
     # Assert
     assert affected == 1
     assert user is None
@@ -996,12 +996,12 @@ def test_delete_user():
 
 ### Benefits of Database Testing with Mocks
 
-✅ **Fast**: No I/O overhead, tests run in milliseconds  
-✅ **Reliable**: No network issues or external dependencies  
-✅ **Simple**: No database setup or teardown required  
-✅ **Isolated**: Each test is completely independent  
-✅ **Verifiable**: Assert on exact database interactions  
-✅ **Flexible**: Easy to simulate error conditions and edge cases  
+✅ **Fast**: No I/O overhead, tests run in milliseconds
+✅ **Reliable**: No network issues or external dependencies
+✅ **Simple**: No database setup or teardown required
+✅ **Isolated**: Each test is completely independent
+✅ **Verifiable**: Assert on exact database interactions
+✅ **Flexible**: Easy to simulate error conditions and edge cases
 
 ### Database Best Practices
 
@@ -1035,7 +1035,7 @@ def test_with_mock():
 
 # tests/integration/test_user_service.py
 def test_with_real_db():
-    db = DatabaseFactory.create(DatabaseType.SQLITE, 
+    db = DatabaseFactory.create(DatabaseType.SQLITE,
                                 DatabaseSettings(database=":memory:"))
     service = UserService(db)
     # Slower but comprehensive
@@ -1050,7 +1050,7 @@ Separate data access from business logic:
 class UserRepository:
     def __init__(self, database: Database):
         self.db = database
-    
+
     def get_by_id(self, user_id: int):
         return self.db.execute_query(
             "SELECT * FROM users WHERE id = ?", (user_id,)
@@ -1059,7 +1059,7 @@ class UserRepository:
 class UserService:
     def __init__(self, user_repo: UserRepository):
         self.repo = user_repo  # Business logic separate from data access
-    
+
     def get_active_user(self, user_id: int):
         user = self.repo.get_by_id(user_id)
         return user if user and user['active'] else None
@@ -1108,7 +1108,7 @@ from axiompy.io import DatabaseFactory, DatabaseType, DatabaseSettings
 from axiompy.data import DataFrameAdapterFactory, LineageTrackerFactory
 
 # Setup database
-db_settings = DatabaseSettings(host="localhost", database="myapp", 
+db_settings = DatabaseSettings(host="localhost", database="myapp",
                                 username="user", password="pass")
 db = DatabaseFactory.create(DatabaseType.POSTGRES, db_settings)
 
@@ -1147,19 +1147,19 @@ Creates a database instance of the specified type.
 class Database(ABC):
     def get(self, table: str, key_value: Any, key_column: str = "id") -> Optional[Dict[str, Any]]
         """Get a single record by key."""
-    
+
     def get_all(self, table: str) -> List[Dict[str, Any]]
         """Get all records from a table."""
-    
+
     def set(self, table: str, data: Dict[str, Any]) -> Any
         """Insert a new record and return its ID/key."""
-    
+
     def update(self, table: str, key_value: Any, data: Dict[str, Any], key_column: str = "id") -> int
         """Update an existing record and return affected rows."""
-    
+
     def delete(self, table: str, key_value: Any, key_column: str = "id") -> int
         """Delete a record by key and return affected rows."""
-    
+
     def execute(self, sql_string: str, params: Optional[Union[Tuple, Dict]] = None) -> Union[int, List[Dict[str, Any]]]
         """Execute arbitrary SQL. Returns list for SELECT, int for INSERT/UPDATE/DELETE."""
 ```
@@ -1370,13 +1370,13 @@ for key, success in results.items():
 ```python
 class DocumentService:
     """Service using storage via dependency injection."""
-    
+
     def __init__(self, storage: ObjectStorage):
         self.storage = storage  # Depends on interface!
-    
+
     def save_document(self, doc_id: str, content: bytes):
         self.storage.put_object(f"docs/{doc_id}.pdf", content)
-    
+
     def get_document(self, doc_id: str) -> bytes:
         return self.storage.get_object(f"docs/{doc_id}.pdf")
 
@@ -1455,14 +1455,14 @@ HTTP client with flexible serializers/deserializers, automatic retry logic, and 
 
 ### Key Features
 
-✅ **Flexible Serialization**: Pass custom serializers/deserializers for any format (JSON, XML, YAML, etc.)  
-✅ **Automatic Retries**: Built-in exponential backoff with configurable retry policies  
-✅ **Error Handling**: Consistent exception handling with detailed error messages  
-✅ **Session Management**: Connection pooling and session reuse  
-✅ **Timeout Handling**: Configurable timeouts for all operations  
-✅ **Authentication**: Support for Basic, Digest, and custom authentication  
-✅ **Type Safe**: Full type hints with generics for return values  
-✅ **Logging**: Built-in debug logging for all requests  
+✅ **Flexible Serialization**: Pass custom serializers/deserializers for any format (JSON, XML, YAML, etc.)
+✅ **Automatic Retries**: Built-in exponential backoff with configurable retry policies
+✅ **Error Handling**: Consistent exception handling with detailed error messages
+✅ **Session Management**: Connection pooling and session reuse
+✅ **Timeout Handling**: Configurable timeouts for all operations
+✅ **Authentication**: Support for Basic, Digest, and custom authentication
+✅ **Type Safe**: Full type hints with generics for return values
+✅ **Logging**: Built-in debug logging for all requests
 ✅ **Async batch (optional)**: Concurrent requests with `httpx`, per-slot fluent headers, `HTTPExchangeStatus` outcomes (`axiompy[http-async]`)
 
 ### Quick Start
@@ -1644,7 +1644,7 @@ class ProtobufSerializer(Serializer):
 class ProtobufDeserializer(Deserializer):
     def __init__(self, message_class):
         self.message_class = message_class
-    
+
     def deserialize(self, response):
         msg = self.message_class()
         msg.ParseFromString(response.content)
@@ -1674,13 +1674,13 @@ def test_get_with_deserializer(mock_get):
     mock_response.ok = True
     mock_response.json.return_value = {"users": [{"id": 1, "name": "Alice"}]}
     mock_get.return_value = mock_response
-    
+
     client = HTTPClientFactory.create()
     deserializer = DeserializerFactory.create_json()
-    
+
     # Act
     result = client.get("https://api.example.com/users", deserializer=deserializer)
-    
+
     # Assert
     assert result == {"users": [{"id": 1, "name": "Alice"}]}
     mock_get.assert_called_once()
@@ -1694,16 +1694,16 @@ JSON-RPC 2.0 client with HTTP transport, retry logic, and comprehensive error ha
 
 ### Key Features
 
-✅ **JSON-RPC 2.0 Compliant**: Full protocol support including batch requests and notifications  
-✅ **Built on HTTPClient**: Leverages existing retry logic, authentication, and session management  
-✅ **Typed Exceptions**: Structured error handling with `JSONRPCMethodError`, `JSONRPCConnectionError`, etc.  
-✅ **Input Validation**: Uses axiompy validators (`ensure_url`, `ensure_not_empty`, `ensure_in_range`) for robust input checking  
-✅ **Performance Logging**: `@LogExecutionTime` decorator on all public methods for debugging  
-✅ **Batch Requests**: Execute multiple method calls in a single HTTP request  
-✅ **Notifications**: Fire-and-forget method calls with no response expected  
-✅ **Mock Client**: Built-in `MockJSONRPCClient` for easy unit testing  
-✅ **Fluent API**: Chainable configuration matching HTTPClient patterns  
-✅ **Factory Pattern**: Consistent client creation via `JSONRPCClientFactory`  
+✅ **JSON-RPC 2.0 Compliant**: Full protocol support including batch requests and notifications
+✅ **Built on HTTPClient**: Leverages existing retry logic, authentication, and session management
+✅ **Typed Exceptions**: Structured error handling with `JSONRPCMethodError`, `JSONRPCConnectionError`, etc.
+✅ **Input Validation**: Uses axiompy validators (`ensure_url`, `ensure_not_empty`, `ensure_in_range`) for robust input checking
+✅ **Performance Logging**: `@LogExecutionTime` decorator on all public methods for debugging
+✅ **Batch Requests**: Execute multiple method calls in a single HTTP request
+✅ **Notifications**: Fire-and-forget method calls with no response expected
+✅ **Mock Client**: Built-in `MockJSONRPCClient` for easy unit testing
+✅ **Fluent API**: Chainable configuration matching HTTPClient patterns
+✅ **Factory Pattern**: Consistent client creation via `JSONRPCClientFactory`
 
 ### Quick Start
 
@@ -1925,17 +1925,17 @@ except JSONRPCMethodError as e:
     print(f"Method error: {e.message}")
     print(f"Error code: {e.code}")  # JSON-RPC error code
     print(f"Error data: {e.data}")  # Optional additional data
-    
+
     # Check specific error codes
     if e.code == JSONRPCErrorCode.METHOD_NOT_FOUND.value:
         print("Method does not exist")
     elif e.code == JSONRPCErrorCode.INVALID_PARAMS.value:
         print("Invalid parameters")
-        
+
 except JSONRPCConnectionError as e:
     # Connection to server failed
     print(f"Connection error: {e}")
-    
+
 except JSONRPCProtocolError as e:
     # Invalid response format from server
     print(f"Protocol error: {e}")
@@ -1995,10 +1995,10 @@ assert mock.calls == []
 class PaymentService:
     def __init__(self, rpc_client):
         self.client = rpc_client  # Depends on interface
-    
+
     def process_payment(self, amount: float) -> dict:
         return self.client.call("process_payment", {"amount": amount})
-    
+
     def get_status(self, payment_id: str) -> dict:
         return self.client.call("get_status", {"id": payment_id})
 
@@ -2159,25 +2159,25 @@ class MyDatabase(Database):
     def __init__(self, settings: DatabaseSettings):
         super().__init__(settings)
         # Connect to database here
-    
+
     def _cleanup(self):
         # Clean up resources here
-    
+
     def get(self, table: str, key_value: Any, key_column: str = "id") -> Optional[Dict[str, Any]]:
         # Implementation - fetch single record
-    
+
     def get_all(self, table: str) -> List[Dict[str, Any]]:
         # Implementation - fetch all records
-    
+
     def set(self, table: str, data: Dict[str, Any]) -> Any:
         # Implementation - insert record
-    
+
     def update(self, table: str, key_value: Any, data: Dict[str, Any], key_column: str = "id") -> int:
         # Implementation - update record
-    
+
     def delete(self, table: str, key_value: Any, key_column: str = "id") -> int:
         # Implementation - delete record
-    
+
     def execute(self, sql_string: str, params: Optional[Union[Tuple, Dict]] = None) -> Union[int, List[Dict[str, Any]]]:
         # Implementation - execute custom SQL
 
@@ -2194,4 +2194,3 @@ Part of the AxiomPy library. See main repository for license information.
 ---
 
 **Last Updated:** 2025-12-03
-

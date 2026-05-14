@@ -1,8 +1,8 @@
 # CODEOWNERS file for axiompy
-# 
+#
 # This file defines who owns and should review specific parts of the codebase.
 # Each line is a file pattern followed by one or more owners.
-# 
+#
 # More info: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
 # Default owners for everything in the repo

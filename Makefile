@@ -1,4 +1,4 @@
-.PHONY: help venv install test coverage lint typecheck security clean clean-all build mcp-example review rag-install rag-ingest rag-query rag-chat rag-stats rag-api 1 2 3
+.PHONY: help venv install test coverage lint typecheck security clean clean-all build mcp-example review rag-install rag-ingest rag-query rag-chat rag-stats rag-api precommit-install 1 2 3
 
 # Virtual environment name (can be overridden)
 # Usage: make venv [name] or make venv env_name=name
@@ -50,8 +50,9 @@ help:
 	@echo "  make clean                   - Clean build artifacts"
 	@echo "  make clean-all [name]        - Clean and remove venv (default: venv)"
 	@echo "  make build                   - Build distribution package (poetry build)"
+	@echo "  make precommit-install       - (Re)install git hooks via pre-commit"
 	@echo ""
-	@echo "  Optional: pre-commit install && pre-commit install --hook-type pre-push"
+	@echo "  Note: 'make venv' and 'make install' auto-install the pre-commit hooks."
 	@echo ""
 	@echo "Code Review (requires axiompy-agents in the environment):"
 	@echo "  make review FILE=/path/to/file.py  - Review a single file"
@@ -211,6 +212,7 @@ venv:
 	@./$(env_name)/bin/pip install -r requirements-dev.txt
 	@echo "Installing editable axiompy (core only)..."
 	@./$(env_name)/bin/pip install -e ".[dev,servers,databases,storage,http,http-async]"
+	@$(MAKE) precommit-install env_name=$(env_name)
 	@echo ""
 	@echo "✓ Virtual environment setup complete!"
 	@echo "To activate: source $(env_name)/bin/activate"
@@ -223,7 +225,27 @@ install:
 	@echo "Installing to virtual environment: $(VENV_DETECT)..."
 	@./$(VENV_DETECT)/bin/pip install -r requirements-dev.txt
 	@./$(VENV_DETECT)/bin/pip install -e ".[dev,servers,databases,storage,http,http-async]"
+	@$(MAKE) precommit-install env_name=$(VENV_DETECT)
 	@echo "✓ Installation complete!"
+
+# Install pre-commit git hooks. Idempotent; safe to call repeatedly.
+# Skips silently if not inside a git checkout (e.g. tarball install).
+.PHONY: precommit-install
+precommit-install:
+	@VENV_PATH=$${env_name:-$(VENV_DETECT)}; \
+	if [ ! -d ".git" ]; then \
+		echo "Not a git checkout — skipping pre-commit install"; \
+		exit 0; \
+	fi; \
+	if [ ! -x "./$$VENV_PATH/bin/pre-commit" ]; then \
+		echo "pre-commit not installed in $$VENV_PATH — skipping hook install"; \
+		echo "  (run 'pip install pre-commit' to enable)"; \
+		exit 0; \
+	fi; \
+	echo "Installing git hooks via pre-commit..."; \
+	./$$VENV_PATH/bin/pre-commit install --install-hooks || exit 1; \
+	./$$VENV_PATH/bin/pre-commit install --hook-type pre-push || exit 1; \
+	echo "✓ Git hooks installed (commit + pre-push)"
 
 test:
 	@if [ -z "$(VENV_DETECT)" ]; then \
@@ -253,7 +275,7 @@ typecheck:
 
 security:
 	@echo "Running security scans..."
-	bandit -r axiompy/ -ll
+	bandit -c pyproject.toml -r axiompy/ -ll
 	pip-audit
 
 clean:

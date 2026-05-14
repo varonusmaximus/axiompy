@@ -27,7 +27,7 @@ Example Usage:
     # Create a metric
     curl -X POST http://localhost:8000/api/v1/metrics \\
         -H "Content-Type: application/json" \\
-        -d '{"name": "daily_revenue", "description": "Daily revenue calculation", 
+        -d '{"name": "daily_revenue", "description": "Daily revenue calculation",
              "source_system": "sales_db", "query_template": "SELECT SUM(amount) FROM sales",
              "tags": "financial,daily"}'
 

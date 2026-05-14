@@ -14,7 +14,15 @@ Tests cover:
 
 import pytest
 
-from axiompy.result import CoreResult, Err, Ok, Result, collect_results, partition_results, try_catch
+from axiompy.result import (
+    CoreResult,
+    Err,
+    Ok,
+    Result,
+    collect_results,
+    partition_results,
+    try_catch,
+)
 
 
 class TestOkVariant:

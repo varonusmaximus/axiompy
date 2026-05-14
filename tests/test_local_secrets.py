@@ -176,10 +176,7 @@ class TestLocalSecretClientParsing:
         env.write_text("URL=https://example.com?key=val&other=1\n")
         settings = LocalSettings(env_file=str(env))
         client = SecretsClientFactory.create(SecretsClientType.LOCAL, settings).unwrap()
-        assert (
-            client.get_secret("url").unwrap()
-            == "https://example.com?key=val&other=1"
-        )
+        assert client.get_secret("url").unwrap() == "https://example.com?key=val&other=1"
 
     def test_whitespace_around_key_and_value(self, tmp_path):
         """Test whitespace around key and value is stripped."""

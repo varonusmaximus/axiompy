@@ -26,28 +26,28 @@ jobs:
   review:
     name: AI Code Review
     runs-on: ubuntu-latest
-    
+
     # Required permissions
     permissions:
       pull-requests: write   # To post review comments
       contents: read         # To read PR contents
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Full history for better context
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'
-      
+
       - name: Install axiompy
         run: |
           pip install git+https://github.com/varonusmaximus/axiompy.git
-      
+
       - name: Run AI Code Review
         id: review
         env:
@@ -55,44 +55,44 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           # Uncomment for Anthropic:
           # ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          
+
           # Central repository containing AGENTS.md
           RULES_REPO: varonusmaximus/axiompy
         run: |
           python << 'PYTHON_SCRIPT'
           import os
           import sys
-          
+
           from axiompy.agents import CodeReviewAgentFactory, ReviewSeverity
-          
+
           # Get PR info from GitHub context
           pr_number = ${{ github.event.pull_request.number }}
           owner = "${{ github.repository_owner }}"
           repo = "${{ github.event.repository.name }}"
           rules_repo = os.environ.get("RULES_REPO", "varonusmaximus/axiompy")
-          
+
           print(f"🔍 Reviewing PR #{pr_number} in {owner}/{repo}")
           print(f"📋 Using rules from: {rules_repo}")
-          
+
           # Create agent
           agent = CodeReviewAgentFactory.create_from_env(rules_repo=rules_repo)
-          
+
           # Run review (automatically posts to GitHub)
           result = agent.review_pr(owner, repo, pr_number)
-          
+
           # Output results
           print(f"\n{'='*60}")
           print(f"Score: {result.score}/100")
           print(f"Rules: {result.rules_enforced}")
           print(f"Comments: {len(result.comments)}")
-          
+
           critical = sum(1 for c in result.comments if c.severity == ReviewSeverity.CRITICAL)
           errors = sum(1 for c in result.comments if c.severity == ReviewSeverity.ERROR)
-          
+
           print(f"Critical: {critical}")
           print(f"Errors: {errors}")
           print(f"{'='*60}\n")
-          
+
           # Set outputs for GitHub Actions
           with open(os.environ["GITHUB_OUTPUT"], "a") as f:
               f.write(f"score={result.score}\n")
@@ -100,15 +100,15 @@ jobs:
               f.write(f"critical={critical}\n")
               f.write(f"errors={errors}\n")
               f.write(f"approved={'true' if result.approved else 'false'}\n")
-          
+
           # Exit with error if critical issues
           if result.has_critical_issues:
               print("❌ FAILED: Critical issues found")
               sys.exit(1)
-          
+
           print("✅ Review complete")
           PYTHON_SCRIPT
-      
+
       # Optional: Add summary to GitHub Actions
       - name: Create Job Summary
         if: always()
@@ -122,4 +122,3 @@ jobs:
           echo "| Critical Issues | ${{ steps.review.outputs.critical }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Errors | ${{ steps.review.outputs.errors }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Approved | ${{ steps.review.outputs.approved }} |" >> $GITHUB_STEP_SUMMARY
-
