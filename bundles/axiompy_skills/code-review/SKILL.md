@@ -5,38 +5,25 @@ description: Review code for quality, security, and maintainability following Ax
 
 # AxiomPy Code Review
 
-## Principles (short)
+## Philosophy
 
-- **Rule of three:** no premature abstractions.
-- **HTTP-first:** prefer `axiompy.io.http` over ad hoc `requests` in runtime code unless justified.
-- **SOLID:** SRP, DIP (factories + injection), prefer **Protocols** over bad inheritance (LSP).
-- **Thin HTTP layer:** parse/validate → delegate to services; no business logic or DB commits in route handlers.
-- **Resilient demos/CLI:** use `CatchAndLog` / structured logging so one failed external step does not kill the whole run when that is the product intent.
-- **Docs diagrams:** prefer linked **images** (SVG/PNG) over embedded Mermaid in committed repo docs unless explicitly a draft.
+Reviews protect **correctness**, **boundaries**, and **long-term simplicity** — not personal taste. Prefer **small, explicit** designs over clever layers.
 
-## Anti-patterns (severity)
+## When to use this skill
 
-| Pattern | Level | Notes |
-|---------|-------|--------|
-| God class | ERROR | Very large classes with many unrelated responsibilities |
-| Speculative ABC | WARNING | One implementation only |
-| Inappropriate intimacy | WARNING | Reaching into `_private` state |
-| Singleton / global mutable | WARNING | Prefer factories + DI |
+PR review, pre-merge checklist, **security** pass, **architecture** / coupling questions, and **test strategy** sanity checks.
 
-## Smells (fix)
+## Normative detail
 
-Long methods (>~50 lines), deep nesting (>4 levels), magic numbers, copy-paste, dead code, hardcoded secrets (**CRITICAL**), bare `except`, `**kwargs` hiding parameters, long parameter lists (prefer Settings/dataclasses).
+See **[reference.md](reference.md)** for triage order, hexagonal links, security, and pointers to **`design-patterns`** sidecars.
 
-## Checklist (core repo)
+## Companion skills
 
-- [ ] Factories: `create` + `create_mock`; **enum**-based dispatch where multiple backends exist
-- [ ] **Settings** dataclass with `__post_init__` validation (`axiompy.validators`)
-- [ ] **Typed** public APIs; Google-style docstrings for public surface
-- [ ] **Logging** via `LoggerFactory` where appropriate
-- [ ] **Secrets:** `SecretsClientFactory` — no ad hoc env reads scattered in library code
-- [ ] **REST / HTTP APIs** (when applicable): resource-oriented paths; soft delete via `DELETE`; avoid verb-shaped URLs — align with **`AGENTS.md`**
-- [ ] No Mermaid blocks in long-lived markdown docs (use images)
+- **`design-patterns`** — factories, settings, HTTP, hexagonal mapping
+- **`code-style`** — formatting, imports, types
+- **`testing`** — unit-heavy vs port-boundary integration
+- **`documentation`** — public API docs
 
-## More examples
+## Historical reference
 
-See [reference.md](reference.md) for short before/after snippets; deep detail lives in **`AGENTS.md`**.
+**`docs/ARCHIVED_AGENTS.md`** — archived monolith for archaeology only.

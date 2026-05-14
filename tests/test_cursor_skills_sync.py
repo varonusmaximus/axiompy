@@ -18,7 +18,6 @@ EXPECTED_SKILLS = [
     "code-style",
     "design-patterns",
     "documentation",
-    "jira-workflow",
     "testing",
 ]
 

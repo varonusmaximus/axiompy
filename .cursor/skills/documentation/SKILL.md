@@ -5,30 +5,18 @@ description: AxiomPy documentation standards for docstrings, module docs, and RE
 
 # AxiomPy Documentation Standards
 
-## Docstrings (Google style)
+## Philosophy
 
-Public functions, classes, and methods need a one-line summary, `Args`, `Returns`, `Raises`, and (when helpful) a short `Example` or `Examples` block.
+Docs should let a **new contributor** ship correct changes without reading the whole codebase—**accurate**, **scannable**, and **aligned** with the real public API.
 
-## Module docstrings
+## When to use this skill
 
-Top of each module: purpose, main capabilities, and pointers to `README.md` under the same folder or to `tests/` for behavior.
+**Docstrings**, **module docs**, **README** structure, **API naming in docs**, and **diagrams** in committed markdown.
 
-## README files
+## Normative detail
 
-**Root `README.md`:** short overview, install, dev commands, links to CI docs and sibling repos — not a full design spec.
+See **[axiompy-documentation-reference.md](axiompy-documentation-reference.md)** (includes diagram / Mermaid policy and REST-in-docs rules).
 
-**Package READMEs** (`axiompy/<area>/README.md`): Quick Start, concepts, API table for factories and key types, errors, testing command, cross-links to related modules.
+## Historical reference
 
-Use ASCII diagrams sparingly; prefer **linked images** for complex figures (see code-review skill: avoid Mermaid in committed docs unless agreed).
-
-## API naming in docs
-
-Document **intent** (`execute_sql`, `query`), not internal engines (`execute_arrow`, vendor-specific names). Implementation details belong in architecture or adapter sections.
-
-## REST / HTTP docs (when you document APIs)
-
-Resource-oriented paths; nouns not verbs; soft delete with `DELETE` on the resource instance. Align examples with **`AGENTS.md`**.
-
-## When the root README changes
-
-Update feature lists and install snippets when you add or remove top-level capabilities; keep coverage / test pointers accurate or remove stale tables.
+Older expanded examples live in **`docs/ARCHIVED_AGENTS.md`** (Documentation section) for archaeology only.

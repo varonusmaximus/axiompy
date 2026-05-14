@@ -134,7 +134,7 @@ This legacy repo is gradually adopting factories.
 ## That's It! 🎉
 
 The next time a PR is opened, the agent will:
-1. Fetch `AGENTS.md` from your central axiompy repository
+1. Fetch your **rules file** (for example root **`AGENTS.md`** — today a short stub — or any markdown you maintain) from your central axiompy repository
 2. Merge with any local `.cursorrules` overrides
 3. Review the PR changes against all rules
 4. Post inline comments on violations
@@ -321,7 +321,7 @@ permissions:
 ### Rules not loading from central repo
 
 1. Verify `rules_repo` is correct (format: `owner/repo`)
-2. Check that `AGENTS.md` exists in the specified branch
+2. Check that the configured `rules_file` (often `AGENTS.md`) exists in the specified branch
 3. Ensure the GitHub token has read access to the rules repo
 
 ### Review taking too long

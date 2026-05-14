@@ -1,4 +1,4 @@
-.PHONY: help venv install test coverage lint typecheck security clean clean-all build mcp-example review rag-install rag-ingest rag-query rag-chat rag-stats rag-api precommit-install ci-local 1 2 3
+.PHONY: help venv install test coverage lint typecheck security clean clean-all build mcp-example review rag-install rag-ingest rag-query rag-chat rag-stats rag-api precommit-install ci-local check-skills-parity 1 2 3
 
 # Virtual environment name (can be overridden)
 # Usage: make venv [name] or make venv env_name=name
@@ -46,6 +46,7 @@ help:
 	@echo "      VENV_PYTHON=/path/to/python3.12  - if python3.12 is not on PATH"
 	@echo "  make install [env_name=name] - Install package in dev mode to venv"
 	@echo "  make test [env_name=name]    - Run tests using venv"
+	@echo "  make check-skills-parity     - Verify .cursor/skills matches bundles/axiompy_skills"
 	@echo "  make coverage [env_name=name]- Run tests with coverage using venv"
 	@echo "  make lint                    - Run ruff and pylint"
 	@echo "  make typecheck               - Run mypy type checker"
@@ -252,6 +253,14 @@ precommit-install:
 	./$$VENV_PATH/bin/pre-commit install --install-hooks || exit 1; \
 	./$$VENV_PATH/bin/pre-commit install --hook-type pre-push || exit 1; \
 	echo "✓ Git hooks installed (commit + pre-push)"
+
+check-skills-parity:
+	@if [ -z "$(VENV_DETECT)" ]; then \
+		echo "Error: No virtual environment found. Run 'make venv' first."; \
+		exit 1; \
+	fi
+	@echo "Checking .cursor/skills vs bundles/axiompy_skills..."
+	$(PYTHON) -m pytest tests/test_skills_bundle_parity.py -q
 
 test:
 	@if [ -z "$(VENV_DETECT)" ]; then \

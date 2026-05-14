@@ -17,7 +17,7 @@ Python package [`axiompy`](axiompy/):
 | Servers | [`axiompy/servers/`](axiompy/servers/) | `ServerFactory`, MCP, JSON-RPC |
 | Secrets | [`axiompy/secrets/`](axiompy/secrets/) | Factory + AWS (Secrets Manager, KMS), local `.env` |
 | Cross-cutting | [`axiompy/validators.py`](axiompy/validators.py), [`axiompy/decorators.py`](axiompy/decorators.py), [`axiompy/loggers.py`](axiompy/loggers.py), [`axiompy/result.py`](axiompy/result.py), [`axiompy/web.py`](axiompy/web.py) | |
-| Cursor skills CLI | [`axiompy/cli/cursor_skills.py`](axiompy/cli/cursor_skills.py) | Syncs bundled skills to `~/.cursor/skills` |
+| Cursor skills CLI | [`axiompy/cli/cursor_skills.py`](axiompy/cli/cursor_skills.py) | Installs bundled **SKILL.md trees** to one resolved directory (see below) |
 
 **Not in this repo:** `axiompy.data` and `axiompy.agents` / `axiompy.reasoning` ship in sibling distributions (**axiompy-data**, **axiompy-agents**) with the same import namespace when those wheels are installed.
 
@@ -50,12 +50,47 @@ See [`.github/workflows/README.md`](.github/workflows/README.md) for CI behavior
 
 ## Cursor skills (`axiompy-skills`)
 
-Bundled skills live in [`bundles/axiompy_skills/`](bundles/axiompy_skills/) (package `axiompy_skills`). Authoring copy for Cursor in-repo: [`.cursor/skills/`](.cursor/skills/).
+The CLI installs **only** bundled **SKILL.md trees** (subfolders under one parent directory such as `~/.cursor/skills`). It does **not** copy [`AGENTS.md`](AGENTS.md) or [`.cursorrules`](.cursorrules).
+
+### How guidance fits together
+
+| Artifact | Role | Installed by `axiompy-skills`? |
+|----------|------|--------------------------------|
+| [`.cursorrules`](.cursorrules) | Workspace rules for Cursor in this repo | No |
+| [`AGENTS.md`](AGENTS.md) | Short stub: where skills and `.cursor/rules` live; points to archive | No |
+| `…/skills/<name>/SKILL.md` | Routed playbooks from the `axiompy_skills` package | Yes |
+
+### Repo layout (authoring vs wheel)
+
+- **Shipped bundle:** [`bundles/axiompy_skills/`](bundles/axiompy_skills/) (package `axiompy_skills` on the wheel).
+- **Authoring mirror:** [`.cursor/skills/`](.cursor/skills/) — must match the bundle; CI enforces parity (`make check-skills-parity` or `pytest tests/test_skills_bundle_parity.py`).
+
+Maintainer notes: [bundles/axiompy_skills/README.md](bundles/axiompy_skills/README.md) (conventions, workflow, destination rules).
+
+### Where skills are installed (one parent directory per run)
+
+Precedence (highest first):
+
+1. `--dest <path>` — parent directory that will contain `code-review/`, `testing/`, etc.
+2. `--project` — `<cwd>/.cursor/skills/`
+3. Environment variable `AXIOMPY_SKILLS_DEST` — same parent directory semantics
+4. `[tool.axiompy.skills]` in the **nearest** `pyproject.toml` (walk upward from `cwd`) — key `destination`: `global`, `project`, or an absolute path string
+5. Default: `~/.cursor/skills`
+
+Example `pyproject.toml` fragment:
+
+```toml
+[tool.axiompy.skills]
+destination = "project"
+```
+
+Commands:
 
 ```bash
+axiompy-skills --show-config   # print resolved parent + config source; no files written
 axiompy-skills --list
-axiompy-skills              # sync to ~/.cursor/skills/
-axiompy-skills --project    # sync into ./.cursor/skills/
+axiompy-skills                 # sync using resolved destination
+axiompy-skills --project       # force <cwd>/.cursor/skills/
 ```
 
 ## Examples

@@ -5,29 +5,22 @@ description: Enforce AxiomPy code style and formatting conventions. Use when wri
 
 # AxiomPy Code Style
 
+## Philosophy
+
+**Readable, boring, explicit** code: types, import hygiene, and predictable structure beat shortcuts. **Public `axiompy/` and `examples/`** meet the **same** bar.
+
+## When to use this skill
+
+Formatting, **imports**, **line length**, **type hints**, **`match/case`**, **enums**, **HTTP client choice**, and **package layout**.
+
 ## Scope (this repository)
 
-**axiompy** core: I/O (`axiompy.io`), servers (`axiompy.servers`), secrets (`axiompy.secrets`), validators, decorators, loggers, `axiompy.result` / `axiompy.web`, CLI, and bundled Cursor skills. Data and agents live in sibling distributions (`axiompy-data`, `axiompy-agents`).
+**axiompy** core: I/O (`axiompy.io`), servers (`axiompy.servers`), secrets (`axiompy.secrets`), validators, decorators, loggers, `axiompy.result` / `axiompy.web`, CLI, bundled Cursor skills. Data and agents live in sibling distributions (`axiompy-data`, `axiompy-agents`).
 
-## General
+## Normative detail
 
-- Python 3.12+
-- Format with **black**, lint with **ruff** (line length 100 per `pyproject.toml`)
-- Type hints on **all** parameters and return types; use `from __future__ import annotations` when needed
-- Prefer **`match` / `case`** over long `if` / `elif` chains for dispatch
-- Use **`Enum` / `str, Enum`** for constrained states instead of raw string literals in internal logic
-- Public names should be **intent-based**, not backend-specific (e.g. `execute_sql`, not `execute_arrow`)
+See **[axiompy-style-reference.md](axiompy-style-reference.md)** for the full checklist.
 
-## Imports
+## Workspace mirror
 
-Group: stdlib, third-party, local (blank lines between). **Absolute** imports from `axiompy.*`. Import specific symbols, not star imports.
-
-## HTTP clients
-
-Prefer **`axiompy.io.http`** (`HTTPClientFactory`, `RetryConfig`) for outbound HTTP. Avoid new direct **`requests`** usage in application code unless documented (streaming, websockets, etc.).
-
-## Layout
-
-Package code under `axiompy/<area>/` with `__init__.py` exporting the public API; optional `README.md` per area. Factories and settings dataclasses live next to the code they construct.
-
-For full project rules, see **`AGENTS.md`** and **`.cursorrules`**.
+Cursor may also load **`.cursorrules`** (short reminder). Historical monolith: **`docs/ARCHIVED_AGENTS.md`**.

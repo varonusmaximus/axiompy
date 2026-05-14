@@ -56,7 +56,7 @@ jobs:
           # Uncomment for Anthropic:
           # ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
-          # Central repository containing AGENTS.md
+          # Central repository containing the rules markdown (e.g. AGENTS.md)
           RULES_REPO: varonusmaximus/axiompy
         run: |
           python << 'PYTHON_SCRIPT'
