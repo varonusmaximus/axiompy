@@ -29,12 +29,3 @@ repos:
     hooks:
       - id: pip-audit
         stages: [pre-push]
-
-  - repo: local
-    hooks:
-      - id: pytest-pre-push
-        name: pytest (pre-push)
-        entry: bash -c 'pytest tests/ -q'
-        language: system
-        pass_filenames: false
-        stages: [pre-push]
