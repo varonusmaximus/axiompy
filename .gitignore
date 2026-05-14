@@ -15,6 +15,7 @@ htmlcov/
 coverage.xml
 
 scripts/resolve_python312.sh
+scripts/purge_axiompy_git_history.sh
 
 # Ignore log files and directories
 logs/
