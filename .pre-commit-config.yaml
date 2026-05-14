@@ -12,6 +12,9 @@ repos:
       - id: mypy
         args: [--config-file=pyproject.toml]
         files: ^axiompy/
+        additional_dependencies:
+          - types-requests
+          - types-PyYAML
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
