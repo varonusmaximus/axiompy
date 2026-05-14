@@ -11,7 +11,7 @@ description: Enforce AxiomPy code style and formatting conventions. Use when wri
 
 ## General
 
-- Python 3.10+
+- Python 3.12+
 - Format with **black**, lint with **ruff** (line length 100 per `pyproject.toml`)
 - Type hints on **all** parameters and return types; use `from __future__ import annotations` when needed
 - Prefer **`match` / `case`** over long `if` / `elif` chains for dispatch

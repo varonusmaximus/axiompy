@@ -2,7 +2,7 @@
 
 **Core utilities for Python applications:** I/O (HTTP, database, object storage, files, JSON-RPC), servers (Flask/FastAPI, JSON-RPC, MCP), secrets, validation, logging, decorators, and `Result` helpers.
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## What is in this repository
@@ -15,7 +15,7 @@ Python package [`axiompy`](axiompy/):
 | Database / object storage / files | [`axiompy/io/`](axiompy/io/) | CRUD abstractions, YAML/JSON helpers |
 | JSON-RPC | [`axiompy/io/jsonrpc.py`](axiompy/io/jsonrpc.py) | Client + batch |
 | Servers | [`axiompy/servers/`](axiompy/servers/) | `ServerFactory`, MCP, JSON-RPC |
-| Secrets | [`axiompy/secrets/`](axiompy/secrets/) | Factory + Cerberus, AWS, Azure, local |
+| Secrets | [`axiompy/secrets/`](axiompy/secrets/) | Factory + AWS (Secrets Manager, KMS), local `.env` |
 | Cross-cutting | [`axiompy/validators.py`](axiompy/validators.py), [`axiompy/decorators.py`](axiompy/decorators.py), [`axiompy/loggers.py`](axiompy/loggers.py), [`axiompy/result.py`](axiompy/result.py), [`axiompy/web.py`](axiompy/web.py) | |
 | Cursor skills CLI | [`axiompy/cli/cursor_skills.py`](axiompy/cli/cursor_skills.py) | Syncs bundled skills to `~/.cursor/skills` |
 
@@ -36,6 +36,8 @@ pip install "axiompy[agents]"    # pulls axiompy-agents from your index
 ```
 
 ## Local development
+
+Requires **Python 3.12+**. On macOS, run **`brew install python@3.12`** once; `make venv` uses that keg automatically (see `scripts/resolve_python312.sh`). No `export` needed if Homebrew is installed.
 
 ```bash
 pip install -r requirements-dev.txt

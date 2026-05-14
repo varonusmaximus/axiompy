@@ -480,10 +480,10 @@ class MockDatabase(Database):
     def __init__(self, settings):
         super().__init__(settings)
         self.data = {}
-    
+
     def get(self, table, key_value, key_column="id"):
         return self.data.get(key_value)
-    
+
     # ... implement other methods
 
 class TestMetricsService(unittest.TestCase):
@@ -491,7 +491,7 @@ class TestMetricsService(unittest.TestCase):
         self.db = MockDatabase(DatabaseSettings())
         self.repo = MetricsRepository(self.db)
         self.service = MetricsService(self.repo)
-    
+
     def test_create_metric(self):
         metric_data = {
             "name": "test_metric",

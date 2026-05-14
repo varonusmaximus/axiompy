@@ -35,9 +35,8 @@ class SecretsClient(ABC):  # pragma: no cover
             Result[str, str]: Ok(secret_value) or Err(error_message)
 
         Examples:
-            - Cerberus: "shared/database/mysql:password"
-            - Vault: "secret/data/database/mysql"
             - AWS Secrets Manager: "prod/database/mysql-password"
+            - Vault-style path: "secret/data/database/mysql"
         """
         pass
 

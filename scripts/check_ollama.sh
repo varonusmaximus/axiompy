@@ -25,4 +25,3 @@ echo "❌ Failed to start Ollama service."
 echo "Try starting manually in another terminal:"
 echo "  ollama serve"
 exit 1
-

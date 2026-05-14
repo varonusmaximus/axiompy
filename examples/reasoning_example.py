@@ -27,8 +27,6 @@ Setup:
 import logging
 from typing import Any
 
-# AxiomPy imports
-from axiompy.io.database import DatabaseFactory, DatabaseSettings, DatabaseType
 from axiompy.reasoning import (
     BaseDatasetService,
     DatasetMetadata,
@@ -37,6 +35,9 @@ from axiompy.reasoning import (
     TableSchemaMetadata,
 )
 from axiompy.reasoning.agents import QueryAgent
+
+# AxiomPy imports
+from axiompy.io.database import DatabaseFactory, DatabaseSettings, DatabaseType
 
 # Configure logging
 logging.basicConfig(

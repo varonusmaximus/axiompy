@@ -29,4 +29,3 @@ max-line-length=100
 [DESIGN]
 max-args=10
 max-attributes=15
-

@@ -6,6 +6,13 @@ repos:
         args: [--fix]
       - id: ruff-format
 
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.20.2
+    hooks:
+      - id: mypy
+        args: [--config-file=pyproject.toml]
+        files: ^axiompy/
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
@@ -17,24 +24,15 @@ repos:
       - id: detect-private-key
 
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.5
+    rev: 1.8.6
     hooks:
       - id: bandit
-        args: [-ll]
+        args: [-c, pyproject.toml, -ll]
         files: ^axiompy/
-        stages: [commit]
+        stages: [pre-commit]
 
   - repo: https://github.com/pypa/pip-audit
     rev: v2.9.0
     hooks:
       - id: pip-audit
-        stages: [pre-push]
-
-  - repo: local
-    hooks:
-      - id: pytest-pre-push
-        name: pytest (pre-push)
-        entry: bash -c 'pytest tests/ -q'
-        language: system
-        pass_filenames: false
         stages: [pre-push]

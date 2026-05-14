@@ -162,9 +162,7 @@ class TestMainCLI:
         for skill in EXPECTED_SKILLS:
             assert (project_dest / skill / "SKILL.md").is_file()
 
-    def test_default_dest_uses_home(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-    ):
+    def test_default_dest_uses_home(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         fake_home = tmp_path / "fakehome"
         fake_home.mkdir()
         monkeypatch.setenv("HOME", str(fake_home))

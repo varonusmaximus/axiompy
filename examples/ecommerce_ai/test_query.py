@@ -10,6 +10,8 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from axiompy.reasoning.agents.query import QueryAgent
+from axiompy.reasoning.factory import ReasoningFactory
 from ecommerce.config.settings import (
     AI_MODEL,
     DATABASE_PATH,
@@ -17,8 +19,6 @@ from ecommerce.config.settings import (
 from ecommerce.services.ecommerce_service import EcommerceService
 
 from axiompy.io.database import DatabaseFactory, DatabaseSettings, DatabaseType
-from axiompy.reasoning.agents.query import QueryAgent
-from axiompy.reasoning.factory import ReasoningFactory
 
 
 def main():

@@ -1,8 +1,8 @@
 """
 Local .env file secrets backend for development.
 
-Provides the same SecretsClient interface as production backends (Cerberus,
-AWS Secrets Manager) but reads secrets from a local .env file. This eliminates
+Provides the same SecretsClient interface as production backends
+(AWS Secrets Manager and other remote vaults) but reads secrets from a local .env file. This eliminates
 the split between vault-based secrets in production and os.environ in development.
 
 Key Features:
@@ -35,8 +35,8 @@ class LocalSecretClient(CredentialProvider):
     """
     Read secrets from a local .env file.
 
-    Provides the same SecretsClient interface as Cerberus, AWS Secrets Manager,
-    etc. Used for local development so the same key names and code paths work
+    Provides the same SecretsClient interface as AWS Secrets Manager and other
+    remote vault backends. Used for local development so the same key names and code paths work
     in all environments.
 
     Args:

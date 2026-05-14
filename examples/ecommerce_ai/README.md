@@ -17,7 +17,7 @@ python setup.py
 
 This creates `data/ecommerce.db` (~100MB) with:
 - **100,000 customers** across 8 countries
-- **500 products** in 7 categories  
+- **500 products** in 7 categories
 - **1,000,000 orders** spanning 12 months
 - **$780M+ in total revenue**
 
@@ -120,10 +120,10 @@ Implements `BaseDatasetService` interface:
 class EcommerceService(BaseDatasetService):
     def query(self, sql: str, limit: int = None) -> list[dict]:
         """Execute SQL queries"""
-    
+
     def get_capabilities(self) -> list[str]:
         """List available analysis capabilities"""
-    
+
     def get_metadata(self) -> DatasetMetadata:
         """Rich metadata for AI reasoning"""
 ```
@@ -288,17 +288,17 @@ from axiompy.io.database import Database
 class MyService(BaseDatasetService):
     dataset_name = "my_dataset"
     description = "My custom dataset"
-    
+
     def __init__(self, db: Database):
         self.db = db
-    
+
     def query(self, sql: str, limit: int = None):
         # Your implementation
         pass
-    
+
     def get_capabilities(self):
         return ["analysis", "reporting"]
-    
+
     def get_metadata(self):
         # Define metadata
         return DatasetMetadata(...)
@@ -385,4 +385,3 @@ generate_ecommerce_database(num_records=100_000)
 ---
 
 **Last Updated:** 2025-12-03
-

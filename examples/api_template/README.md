@@ -240,12 +240,12 @@ This template implements **Domain-Driven Design** with clear separation of conce
 class ResourceRoutes:
     def __init__(self, service: ResourceService):
         self.service = service
-    
+
     @CatchAndLog(logger, reraise=False, default_return=({"error": "Internal"}, 500))
     async def create_resource(self, data: dict):
         """
         POST /api/v1/resources - 5-step adapter with Result pipeline
-        
+
         Uses .map() and .then() to chain transformations.
         If any step fails, short-circuits to error handling.
         """
@@ -260,7 +260,7 @@ class ResourceRoutes:
                 "message": "Resource created"
             })
         )
-        
+
         # Handle result: success or error
         if result.is_ok():
             return result.unwrap()
@@ -279,7 +279,7 @@ class ResourceModel(BaseModel):
     id: Optional[int] = None
     name: str
     description: Optional[str] = None
-    
+
     @classmethod
     def from_domain(cls, resource: "Resource") -> "ResourceModel":
         """Convert domain entity to HTTP representation"""
@@ -288,7 +288,7 @@ class ResourceModel(BaseModel):
             name=resource.name,
             description=resource.description
         )
-    
+
     def to_domain(self) -> "Resource":
         """Convert HTTP representation to domain entity"""
         return Resource(
@@ -322,7 +322,7 @@ class Resource:
     id: Optional[int] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
-    
+
     @classmethod
     def from_dict(cls, data: dict) -> "Resource":
         """Convert dict (from repository) to domain entity"""
@@ -333,7 +333,7 @@ class Resource:
             created_at=data.get("created_at"),
             updated_at=data.get("updated_at")
         )
-    
+
     def to_dict(self) -> dict:
         """Convert domain entity to dict (for repository)"""
         return {
@@ -347,21 +347,21 @@ class Resource:
 # services/resource_service.py
 class ResourceService:
     """Business logic for resources - standalone service (no inheritance)"""
-    
+
     def __init__(self, repository: ResourceRepository):
         self.repository = repository
-    
+
     @LogAndRethrow(logger)
     def create_resource(self, resource: Resource) -> Resource:
         """Create resource with business validation"""
         # Validate business rules
         ensure_not_empty(resource.name, "Resource name cannot be empty")
         ensure_length(resource.name, min_length=1, max_length=255)
-        
+
         # Persist via repository
         resource_dict = resource.to_dict()
         resource_id = self.repository.create(resource_dict)
-        
+
         # Return domain entity with generated ID and timestamps
         created_dict = self.repository.get_by_id(resource_id)
         return Resource.from_dict(created_dict)
@@ -383,17 +383,17 @@ class ResourceService:
 # services/repository.py
 class ResourceRepository:
     """Data access layer for resources"""
-    
+
     def __init__(self, database: Database):
         ensure_not_none(database, "Database cannot be None")
         self.db = database
         self._ensure_schema()
-    
+
     def create(self, data: dict) -> int:
         """Create resource. Returns ID"""
         ensure_not_none(data, "Data cannot be None")
         ensure_type(data, dict, "Data must be a dict")
-        
+
         now = datetime.utcnow().isoformat()
         data_with_timestamps = {
             **data,
@@ -401,40 +401,40 @@ class ResourceRepository:
             "updated_at": now
         }
         data_with_timestamps.pop("id", None)
-        
+
         return self.db.set("resources", data_with_timestamps)
-    
+
     def get_by_id(self, resource_id: int) -> Optional[dict]:
         """Get resource by ID. Returns dict or None"""
         ensure_not_none(resource_id, "Resource ID cannot be None")
         ensure_type(resource_id, int, "Resource ID must be int")
-        
+
         return self.db.get("resources", resource_id)
-    
+
     def get_all(self) -> List[dict]:
         """Get all resources. Returns list of dicts"""
         return self.db.get_all("resources")
-    
+
     def update(self, resource_id: int, data: dict) -> int:
         """Update resource. Returns rows affected"""
         ensure_not_none(resource_id, "Resource ID cannot be None")
         ensure_type(resource_id, int, "Resource ID must be int")
         ensure_not_none(data, "Data cannot be None")
-        
+
         data_with_timestamp = {
             **data,
             "updated_at": datetime.utcnow().isoformat()
         }
         data_with_timestamp.pop("id", None)
         data_with_timestamp.pop("created_at", None)
-        
+
         return self.db.update("resources", resource_id, data_with_timestamp)
-    
+
     def delete(self, resource_id: int) -> int:
         """Delete resource. Returns rows affected"""
         ensure_not_none(resource_id, "Resource ID cannot be None")
         ensure_type(resource_id, int, "Resource ID must be int")
-        
+
         return self.db.delete("resources", resource_id)
 ```
 
@@ -596,14 +596,14 @@ If you prefer to implement manually, follow these patterns from the template:
 
 ## Best Practices
 
-✅ **Use Result types** for all service methods (no exceptions)  
-✅ **Validate at boundaries** (API routes + service entry points)  
-✅ **Log at DEBUG level** only (performance in production)  
-✅ **Add retry decorators** for external API calls  
-✅ **Test unit logic first**, then integration  
-✅ **Document service intent** in docstrings  
-✅ **Use consistent error messages** with recovery hints  
-✅ **Never catch generic exceptions** - be specific  
+✅ **Use Result types** for all service methods (no exceptions)
+✅ **Validate at boundaries** (API routes + service entry points)
+✅ **Log at DEBUG level** only (performance in production)
+✅ **Add retry decorators** for external API calls
+✅ **Test unit logic first**, then integration
+✅ **Document service intent** in docstrings
+✅ **Use consistent error messages** with recovery hints
+✅ **Never catch generic exceptions** - be specific
 
 ## Advanced Customization
 
@@ -655,7 +655,7 @@ class UserRepository:
     def __init__(self, database: Database = None):
         """
         Initialize repository with database.
-        
+
         Args:
             database: Database instance. If None, creates from factory.
                      Pass a mock for testing.
@@ -663,7 +663,7 @@ class UserRepository:
         if database is None:
             database = DatabaseFactory.create(DatabaseType.POSTGRES, db_settings)
         self.db = database
-    
+
     def get_user(self, user_id: str) -> Result[dict, str]:
         try:
             user = self.db.get("users", user_id)
@@ -672,21 +672,21 @@ class UserRepository:
             return Ok(user)
         except DatabaseError as e:
             return Err(f"Database error: {str(e)}")
-    
+
     def create_user(self, user_data: dict) -> Result[str, str]:
         try:
             user_id = self.db.set("users", user_data)
             return Ok(user_id)
         except DatabaseError as e:
             return Err(f"Database error: {str(e)}")
-    
+
     def update_user(self, user_id: str, user_data: dict) -> Result[bool, str]:
         try:
             self.db.update("users", user_id, user_data)
             return Ok(True)
         except DatabaseError as e:
             return Err(f"Database error: {str(e)}")
-    
+
     def delete_user(self, user_id: str) -> Result[bool, str]:
         try:
             self.db.delete("users", user_id)
@@ -699,18 +699,18 @@ class UserService(BaseService):
     def __init__(self, repository: UserRepository = None):
         """
         Initialize service with repository.
-        
+
         Args:
             repository: UserRepository instance. If None, creates with default database.
                        Pass a mock for testing.
         """
         super().__init__()
         self.repository = repository or UserRepository()
-    
+
     def get_user(self, user_id: str) -> Result[dict, str]:
         # Business logic can validate and transform
         return self.repository.get_user(user_id)
-    
+
     def create_user(self, user_data: dict) -> Result[str, str]:
         # Business logic: validate, enrich, etc.
         ensure_not_empty(user_data.get("email"), "Email is required")
@@ -731,7 +731,7 @@ class MockUserRepository:
 def test_get_user():
     mock_repo = MockUserRepository()
     service = UserService(repository=mock_repo)
-    
+
     result = service.get_user("1")
     assert result.is_ok()
     assert result.unwrap()["email"] == "test@example.com"
@@ -787,16 +787,16 @@ pytest tests/ --cov=api --cov=services --cov-report=html
 
 ## Troubleshooting
 
-**Import errors?**  
+**Import errors?**
 Make sure `api/` and `services/` directories are Python packages (have `__init__.py`)
 
-**Tests not running?**  
+**Tests not running?**
 Install pytest: `pip install pytest pytest-cov`
 
-**FastAPI not found?**  
+**FastAPI not found?**
 Install dependencies: `pip install -r requirements.txt`
 
-**Port already in use?**  
+**Port already in use?**
 Change API_PORT in `.env` or use different port: `python -m api.main --port 9000`
 
 ## Example Implementation
@@ -829,4 +829,3 @@ Same as axiompy (MIT)
 ---
 
 **Last Updated:** 2025-12-03
-

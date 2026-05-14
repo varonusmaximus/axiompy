@@ -1,7 +1,6 @@
 # Ignore macOS system files
 .DS_Store
 
-
 # Ignore Python cache files and directories
 __pycache__/
 *.pyc
@@ -13,6 +12,10 @@ __pycache__/
 # Ignore coverage report folder
 htmlcov/
 .coverage
+coverage.xml
+
+scripts/resolve_python312.sh
+scripts/purge_axiompy_git_history.sh
 
 # Ignore log files and directories
 logs/

@@ -45,8 +45,8 @@ examples/servers/
 
 ### Simple Web Server
 
-**File**: `simple_server.py`  
-**Time**: 5 minutes  
+**File**: `simple_server.py`
+**Time**: 5 minutes
 **What you'll learn**: Basic Flask/FastAPI setup with AxiomPy abstraction
 
 ```python
@@ -80,8 +80,8 @@ python simple_server.py
 
 ### Production Patterns
 
-**File**: `server_usage.py`  
-**Time**: 20 minutes  
+**File**: `server_usage.py`
+**Time**: 20 minutes
 **What you'll learn**: Production-ready patterns, middleware, services
 
 Contains:
@@ -121,8 +121,8 @@ python server_usage.py
 
 ### Testing Strategies
 
-**File**: `server_testing.py`  
-**Time**: 15 minutes  
+**File**: `server_testing.py`
+**Time**: 15 minutes
 **What you'll learn**: Testing without HTTP overhead, mocking servers
 
 Contains:
@@ -154,8 +154,8 @@ pytest server_testing.py -v
 
 ### MCP Basic Server
 
-**File**: `mcp_basic.py`  
-**Time**: 10 minutes  
+**File**: `mcp_basic.py`
+**Time**: 10 minutes
 **What you'll learn**: Basic MCP tool registration and execution
 
 ```python
@@ -195,8 +195,8 @@ python mcp_basic.py
 
 ### MCP Advanced Server
 
-**File**: `mcp_advanced.py`  
-**Time**: 30 minutes  
+**File**: `mcp_advanced.py`
+**Time**: 30 minutes
 **What you'll learn**: Complex workflows, sessions, error handling
 
 Contains:
@@ -236,8 +236,8 @@ python mcp_advanced.py
 
 ### Chainable Validators & LLM Reasoning
 
-**File**: `mcp_validators_examples.py`  
-**Time**: 45 minutes  
+**File**: `mcp_validators_examples.py`
+**Time**: 45 minutes
 **What you'll learn**: THE MOST IMPORTANT PATTERN for enterprise MCP servers
 
 This is the **core pattern** for intelligent tool validation with optional LLM support.
@@ -494,8 +494,8 @@ python mcp_validators_examples.py
 
 ### Testing MCP Servers
 
-**File**: `mcp_testing.py`  
-**Time**: 20 minutes  
+**File**: `mcp_testing.py`
+**Time**: 20 minutes
 **What you'll learn**: Testing MCP servers with mocks and integration patterns
 
 Contains:
@@ -700,4 +700,3 @@ pytest mcp_testing.py -v
 ---
 
 **Last Updated:** 2025-12-03
-

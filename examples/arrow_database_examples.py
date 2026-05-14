@@ -208,15 +208,15 @@ def example_read_files() -> None:
             # Query files directly with SQL (without loading first!)
             result = db.execute_arrow(
                 f"""
-                SELECT 
+                SELECT
                     c.name as customer_name,
                     p.product_name,
                     o.quantity,
                     p.price * o.quantity as total
                 FROM read_csv_auto('{tmppath / "orders.csv"}') o
-                JOIN read_parquet('{tmppath / "products.parquet"}') p 
+                JOIN read_parquet('{tmppath / "products.parquet"}') p
                     ON o.product_id = p.product_id
-                JOIN read_json_auto('{tmppath / "customers.ndjson"}') c 
+                JOIN read_json_auto('{tmppath / "customers.ndjson"}') c
                     ON o.customer_id = c.customer_id
                 ORDER BY total DESC
             """
@@ -306,7 +306,7 @@ def example_in_memory_processing() -> None:
         # Aggregate events by user
         user_stats = db.execute_arrow(
             """
-            SELECT 
+            SELECT
                 u.username,
                 COUNT(*) as total_events,
                 COUNT(CASE WHEN e.event_type = 'purchase' THEN 1 END) as purchases,
@@ -329,7 +329,7 @@ def example_in_memory_processing() -> None:
         # Event type breakdown
         event_breakdown = db.execute_arrow(
             """
-            SELECT 
+            SELECT
                 event_type,
                 COUNT(*) as count,
                 ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) as percentage
@@ -379,11 +379,11 @@ def example_dataframe_integration() -> None:
         # Generate sample data
         sample_data = db.execute_arrow(
             """
-            SELECT 
+            SELECT
                 i as id,
                 'user_' || i as name,
-                CASE WHEN i % 3 = 0 THEN 'admin' 
-                     WHEN i % 3 = 1 THEN 'user' 
+                CASE WHEN i % 3 = 0 THEN 'admin'
+                     WHEN i % 3 = 1 THEN 'user'
                      ELSE 'guest' END as role,
                 random() * 100 as score
             FROM generate_series(1, 1000) as t(i)
@@ -398,9 +398,9 @@ def example_dataframe_integration() -> None:
                 """
                 SELECT role, COUNT(*) as count, AVG(score) as avg_score
                 FROM generate_series(1, 1000) as t(i),
-                     LATERAL (SELECT 
-                         CASE WHEN i % 3 = 0 THEN 'admin' 
-                              WHEN i % 3 = 1 THEN 'user' 
+                     LATERAL (SELECT
+                         CASE WHEN i % 3 = 0 THEN 'admin'
+                              WHEN i % 3 = 1 THEN 'user'
                               ELSE 'guest' END as role,
                          random() * 100 as score
                      ) stats
@@ -416,7 +416,7 @@ def example_dataframe_integration() -> None:
         if POLARS_AVAILABLE:
             df_polars = db.to_polars(
                 """
-                SELECT 
+                SELECT
                     i as id,
                     random() * 100 as value
                 FROM generate_series(1, 5) as t(i)
@@ -499,7 +499,7 @@ def example_etl_pipeline() -> None:
             # Daily sales by category
             daily_category_sales = db.execute_arrow(
                 """
-                SELECT 
+                SELECT
                     s.sale_date,
                     p.category,
                     COUNT(*) as num_sales,
@@ -516,7 +516,7 @@ def example_etl_pipeline() -> None:
             # Top products
             top_products = db.execute_arrow(
                 """
-                SELECT 
+                SELECT
                     p.product_name,
                     p.category,
                     SUM(s.quantity) as units_sold,

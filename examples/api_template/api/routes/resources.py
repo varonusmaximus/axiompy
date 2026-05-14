@@ -208,9 +208,11 @@ class ResourceRoutes:
         result = (
             ResultValidator.validate_id(resource_id)
             .then(
-                lambda rid: ResultValidator.parse_model(data, ResourceModel)
-                .map(lambda model: model.to_domain())
-                .map(lambda resource: self._set_id(resource, rid))
+                lambda rid: (
+                    ResultValidator.parse_model(data, ResourceModel)
+                    .map(lambda model: model.to_domain())
+                    .map(lambda resource: self._set_id(resource, rid))
+                )
             )
             .then(
                 lambda resource: ResultConverter.or_not_found(

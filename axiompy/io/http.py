@@ -48,7 +48,7 @@ Quick Examples:
 import contextlib
 import time
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, TypeVar, Union
 
 import requests
@@ -82,7 +82,7 @@ class AuthType(Enum):
     CUSTOM = "custom"
 
 
-class HTTPTransport(str, Enum):
+class HTTPTransport(StrEnum):
     """Transport selection for :class:`HTTPClientFactory`."""
 
     SYNC = "sync"

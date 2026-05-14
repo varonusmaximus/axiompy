@@ -14,7 +14,6 @@ from typing import Any, Dict, Optional
 class SecretsClientType(Enum):
     """Supported secret management backends."""
 
-    CERBERUS = "cerberus"
     AWS_SECRETS_MANAGER = "aws_secrets_manager"
     AWS_KMS = "aws_kms"
     LOCAL = "local"
@@ -29,16 +28,6 @@ class SecretsSettings:
     """
 
     pass
-
-
-@dataclass
-class CerberusSettings(SecretsSettings):
-    """Acme's Cerberus secret vault configuration."""
-
-    vault_path: str
-    cerberus_url: str
-    cerberus_region: str
-    verbose: bool = False
 
 
 @dataclass
@@ -141,7 +130,6 @@ class Credential:
 __all__ = [
     "SecretsClientType",
     "SecretsSettings",
-    "CerberusSettings",
     "AWSSecretsManagerSettings",
     "AWSKMSSettings",
     "LocalSettings",

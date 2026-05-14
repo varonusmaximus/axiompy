@@ -99,7 +99,7 @@ class MCPTool:
     return_type: str = "any"          # Return type hint
     tags: List[str] = field(default_factory=list)  # Categorization
     created_at: datetime = field(default_factory=datetime.now)
-    
+
     def execute(self, **kwargs) -> Any:
         """Execute tool with given parameters."""
         return self.func(**kwargs)
@@ -114,7 +114,7 @@ class MCPSession:
     metadata: Dict[str, Any]           # Custom context
     created_at: datetime = field(default_factory=datetime.now)
     last_activity: datetime = field(default_factory=datetime.now)
-    
+
     # Session lifecycle tracks all tool invocations
 ```
 
@@ -161,22 +161,22 @@ The validator layer is abstraction-based, similar to ServerFactory pattern:
 ```python
 class MCPToolValidator(ABC):
     """Abstract interface for tool validation strategies."""
-    
+
     @abstractmethod
     def register_tool(name, category, prerequisites, ...) -> None: ...
-    
+
     @abstractmethod
     def validate_tool(tool_name, parameters, session) -> Result[bool, str]: ...
-    
+
     @abstractmethod
     def suggest_tool_sequence(goal, session) -> Result[List[str], str]: ...
-    
+
     @abstractmethod
     def estimate_cost(tool_sequence) -> Result[int, str]: ...
-    
+
     @abstractmethod
     def create_session(session_id) -> MCPReasoningSession: ...
-    
+
     @abstractmethod
     def record_tool_call(session_id, tool_name, params, result, error) -> None: ...
 ```
@@ -424,7 +424,7 @@ Created (create_session)
     ├─ total_cost: 0
     ├─ failed_tools: set()
     └─ last_activity: now
-    
+
 Active (tool executions)
     ↓
 Each execution:
@@ -469,10 +469,10 @@ Register tool B:
 Session execution:
   1. Execute A → success
      data_available: {"customer"}
-  
+
   2. Validate B:
      requires_data ["customer"] ⊆ data_available {"customer"} ✓
-     
+
   3. Execute B
 ```
 
@@ -538,16 +538,16 @@ Err("Tool 'unknown_tool' not found")
 **Purpose:** Override default validation with business logic
 
 ```python
-def custom_validator(tool_metadata: MCPToolReasoning, 
+def custom_validator(tool_metadata: MCPToolReasoning,
                     parameters: Dict[str, Any]) -> Result[bool, str]:
     # Access tool metadata
     tool_name = tool_metadata.name
     risk = tool_metadata.risk_level
-    
+
     # Implement custom logic
     if risk == RiskLevel.HIGH and parameters.get('amount') > 10000:
         return Err("High-risk operations over $10k require manager approval")
-    
+
     return Ok(True)
 
 reasoning.register_custom_validator("transfer_funds", custom_validator)
@@ -566,10 +566,10 @@ reasoning.register_custom_validator("transfer_funds", custom_validator)
 def ml_sequencer(goal: str, session: MCPReasoningSession) -> Result[List[str], str]:
     # Use ML model to predict optimal sequence
     from my_ml_module import predict_sequence
-    
+
     available_tools = list(reasoning.tool_metadata.keys())
     sequence = predict_sequence(goal, session.data_available, available_tools)
-    
+
     return Ok(sequence)
 
 reasoning.register_custom_sequencer(ml_sequencer)
@@ -591,11 +591,11 @@ class CustomMCPServer(MCPServer):
     def _execute_impl(self, tool_name: str, session: MCPSession, kwargs: Dict) -> Any:
         # Platform-specific execution
         # Called after standard validation
-        
+
         if tool_name == "special_tool":
             # Custom logic for OpenAI, Google ADK, etc.
             return self.platform_specific_execute(tool_name, kwargs)
-        
+
         return super()._execute_impl(tool_name, session, kwargs)
 ```
 
@@ -607,13 +607,13 @@ class CustomMCPServer(MCPServer):
 class AuthenticationMiddleware:
     def __init__(self, reasoning: SimpleMCPReasoning):
         self.reasoning = reasoning
-    
-    def validate_and_record(self, session_id, tool_name, parameters, 
+
+    def validate_and_record(self, session_id, tool_name, parameters,
                            execute_func) -> Result[Any, str]:
         # Check authentication first
         if not self.is_authenticated(session_id):
             return Err("Not authenticated")
-        
+
         # Then apply reasoning validation
         return MCPReasoningMiddleware(self.reasoning).validate_and_record(
             session_id, tool_name, parameters, execute_func
@@ -767,15 +767,15 @@ After MCP (50 lines):
 settings = MCPServerSettings(name="ExampleTools")
 server = MCPServerFactory.create(MCPServerType.OPENAI, settings)
 
-server.register_tool("get_customer_profile", 
+server.register_tool("get_customer_profile",
                     example_data.get_customer, "Get customer profile")
-server.register_tool("query_inventory", 
+server.register_tool("query_inventory",
                     example_inventory.query, "Query product inventory")
-server.register_tool("get_recommendation", 
+server.register_tool("get_recommendation",
                     example_ml.recommend, "Get recommendation")
-server.register_tool("apply_discount", 
+server.register_tool("apply_discount",
                     example_commerce.discount, "Apply discount")
-server.register_tool("send_offer", 
+server.register_tool("send_offer",
                     example_comms.send_offer, "Send offer to customer")
 
 server.initialize()
@@ -858,4 +858,3 @@ send_offer
 4. **Analytics**: Track tool usage, performance metrics
 5. **A/B Testing**: Compare different sequencing strategies
 6. **ML Integration**: ML-based custom sequencers (included in examples)
-
