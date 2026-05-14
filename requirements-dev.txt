@@ -48,10 +48,9 @@ uvicorn>=0.24.0
 httpx>=0.25.0
 
 # Secrets integration tests
-cerberus-client>=0.3.0
 hvac>=1.1.0
 azure-keyvault-secrets>=4.7.0
 azure-identity>=1.13.0
 
-# AWS mocking
-moto>=4.2.0
+# AWS mocking (Secrets Manager / KMS tests; must match pyproject [project.optional-dependencies].dev)
+moto[secretsmanager,kms]>=4.2.0

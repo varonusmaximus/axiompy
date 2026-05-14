@@ -26,13 +26,9 @@ class SecretsClientFactory:
     with appropriate error handling.
 
     Example:
-        >>> from axiompy.secrets import SecretsClientFactory, SecretClientType, CerberusSettings
-        >>> settings = CerberusSettings(
-        ...     vault_path="shared/database/mysql",
-        ...     cerberus_url="https://cerberus.example.com",
-        ...     cerberus_region="us-west-2"
-        ... )
-        >>> result = SecretsClientFactory.create(SecretClientType.CERBERUS, settings)
+        >>> from axiompy.secrets import LocalSettings, SecretsClientFactory, SecretsClientType
+        >>> settings = LocalSettings(env_file=".env")
+        >>> result = SecretsClientFactory.create(SecretsClientType.LOCAL, settings)
         >>> client = result.unwrap()  # Or handle error with result.map_error()
     """
 
@@ -54,9 +50,9 @@ class SecretsClientFactory:
             Result[SecretClient, str]: Ok(client) or Err(error_message)
 
         Example:
-            >>> from axiompy.secrets import SecretsClientFactory, SecretClientType, CerberusSettings
-            >>> settings = CerberusSettings(vault_path="secret/db", ...)
-            >>> client_result = SecretsClientFactory.create(SecretClientType.CERBERUS, settings)
+            >>> from axiompy.secrets import LocalSettings, SecretsClientFactory, SecretsClientType
+            >>> settings = LocalSettings(env_file=".env")
+            >>> client_result = SecretsClientFactory.create(SecretsClientType.LOCAL, settings)
             >>> client = client_result.unwrap()
         """
         try:
@@ -84,14 +80,6 @@ class SecretsClientFactory:
 # Auto-register implementations
 def _register_implementations():
     """Auto-register all available implementations."""
-    try:
-        from .implementations.cerberus import CerberusSecretClient
-
-        SecretsClientFactory._IMPLEMENTATIONS[SecretsClientType.CERBERUS] = CerberusSecretClient
-        logger.debug("Registered CerberusSecretClient")
-    except ImportError:
-        logger.debug("CerberusSecretClient not available (Cerberus SDK not installed)")
-
     try:
         from .implementations.aws_secrets_manager import AWSSecretsManagerClient
 

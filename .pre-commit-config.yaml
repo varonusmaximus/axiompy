@@ -6,6 +6,13 @@ repos:
         args: [--fix]
       - id: ruff-format
 
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.20.2
+    hooks:
+      - id: mypy
+        args: [--config-file=pyproject.toml]
+        files: ^axiompy/
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:

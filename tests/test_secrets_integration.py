@@ -11,8 +11,8 @@ from axiompy.secrets import (
     AuthToken,
     AWSKMSSettings,
     AWSSecretsManagerSettings,
-    CerberusSettings,
     Credential,
+    LocalSettings,
     SecretsClient,
     SecretsClientFactory,
     SecretsClientType,
@@ -70,34 +70,24 @@ class MockSecretClient(SecretsClient):
 class TestSecretsClientFactory:
     """Test SecretsClientFactory."""
 
-    def test_factory_creates_cerberus_client(self):
-        """Test that factory can attempt to create Cerberus client."""
-        # Factory auto-registers implementations on import
-        # This test verifies the factory exists and responds appropriately
-        # when given valid settings
-        from axiompy.secrets import CerberusSettings
-
-        settings = CerberusSettings(
-            vault_path="test/path", cerberus_url="https://example.com", cerberus_region="us-west-2"
-        )
-
-        # The create method should return a Result
-        result = SecretsClientFactory.create(SecretsClientType.CERBERUS, settings)
-        # Result will be Ok or Err depending on whether cerberus-client is installed
-        assert result.is_ok() or result.is_err()
+    def test_factory_creates_local_client(self, tmp_path):
+        """Factory creates a LOCAL client when settings and backend match."""
+        env_file = tmp_path / ".env"
+        env_file.write_text("MY_KEY=hello\n", encoding="utf-8")
+        settings = LocalSettings(env_file=str(env_file))
+        result = SecretsClientFactory.create(SecretsClientType.LOCAL, settings)
+        assert result.is_ok()
+        assert result.unwrap().get_secret("MY_KEY").unwrap() == "hello"
 
     def test_factory_error_on_unsupported_type(self):
         """Test that factory returns error for unsupported types."""
-        # Create a hypothetical unsupported settings
         from dataclasses import dataclass
 
         @dataclass
         class FakeSettings:
             pass
 
-        # This should gracefully handle unknown types
-        result = SecretsClientFactory.create(SecretsClientType.CERBERUS, FakeSettings())
-        # Should fail during client initialization
+        result = SecretsClientFactory.create(SecretsClientType.LOCAL, FakeSettings())
         assert result.is_err()
 
 
@@ -224,16 +214,11 @@ class TestResultChaining:
 class TestSettingsDataclasses:
     """Test settings dataclasses."""
 
-    def test_cerberus_settings(self):
-        """Test Cerberus settings."""
-        settings = CerberusSettings(
-            vault_path="shared/db",
-            cerberus_url="https://cerberus.example.com",
-            cerberus_region="us-west-2",
-        )
-
-        assert settings.vault_path == "shared/db"
-        assert settings.cerberus_url == "https://cerberus.example.com"
+    def test_local_settings_defaults(self):
+        """Test LocalSettings defaults."""
+        settings = LocalSettings()
+        assert settings.env_file == ".env"
+        assert settings.case_insensitive is True
 
     def test_aws_secrets_manager_settings(self):
         """Test AWS Secrets Manager settings."""
@@ -357,17 +342,13 @@ class TestMockClientAdvanced:
 class TestFactoryIntegration:
     """Integration tests for factory pattern."""
 
-    def test_factory_create_returns_result(self):
+    def test_factory_create_returns_result(self, tmp_path):
         """Test that factory.create returns a Result."""
-        from axiompy.secrets import CerberusSettings
-
-        settings = CerberusSettings(
-            vault_path="test", cerberus_url="https://example.com", cerberus_region="us-west-2"
-        )
-
-        result = SecretsClientFactory.create(SecretsClientType.CERBERUS, settings)
-        # Result should be either Ok or Err
-        assert result.is_ok() or result.is_err()
+        env_file = tmp_path / ".env"
+        env_file.write_text("k=v\n", encoding="utf-8")
+        settings = LocalSettings(env_file=str(env_file))
+        result = SecretsClientFactory.create(SecretsClientType.LOCAL, settings)
+        assert result.is_ok()
 
 
 class TestTypeDefinitions:
@@ -442,34 +423,6 @@ class TestTypeDefinitions:
         assert not cred.is_expired()
 
 
-class TestCerberusIntegration:
-    """Tests for Cerberus client integration."""
-
-    def test_cerberus_settings_complete(self):
-        """Test complete Cerberus settings."""
-        settings = CerberusSettings(
-            vault_path="shared/database/mysql",
-            cerberus_url="https://cerberus.example.com",
-            cerberus_region="us-west-2",
-            verbose=True,
-        )
-
-        assert settings.vault_path == "shared/database/mysql"
-        assert settings.cerberus_url == "https://cerberus.example.com"
-        assert settings.cerberus_region == "us-west-2"
-        assert settings.verbose is True
-
-    def test_cerberus_default_verbose(self):
-        """Test Cerberus settings with default verbose."""
-        settings = CerberusSettings(
-            vault_path="shared/database/mysql",
-            cerberus_url="https://cerberus.example.com",
-            cerberus_region="us-west-2",
-        )
-
-        assert settings.verbose is False
-
-
 class TestAWSSecretsManagerIntegration:
     """Tests for AWS Secrets Manager client integration."""
 
@@ -530,161 +483,6 @@ class TestAWSKMSIntegration:
         assert settings.key_id == "alias/my-key"
         assert settings.access_key_id == "AKIA..."
         assert settings.secret_access_key == "secret..."
-
-
-class MockCerberusBackend:
-    """Mock Cerberus backend client for testing."""
-
-    def __init__(self, vault_url, region, verbose):
-        self.vault_url = vault_url
-        self.region = region
-        self.verbose = verbose
-        self.secrets = {
-            "shared/database/mysql": {
-                "password": "secret123",
-                "username": "admin",
-                "host": "localhost",
-            },
-            "shared/api/stripe": {"key": "sk_live_test", "secret": "secret_test"},
-        }
-
-    def get_secrets_data(self, path):
-        """Mock get_secrets_data method."""
-        if path not in self.secrets:
-            raise Exception(f"Path not found: {path}")
-        return self.secrets[path]
-
-
-class TestCerberusImplementation:
-    """Comprehensive tests for Cerberus implementation."""
-
-    def _create_test_client(self):
-        """Helper to create a Cerberus client with mocked backend."""
-        import sys
-        from unittest.mock import MagicMock, patch
-
-        from axiompy.secrets.implementations.cerberus import CerberusSecretClient
-
-        mock_backend = MockCerberusBackend("https://cerberus.example.com", "us-west-2", False)
-
-        settings = CerberusSettings(
-            vault_path="shared/database/mysql",
-            cerberus_url="https://cerberus.example.com",
-            cerberus_region="us-west-2",
-        )
-
-        # Create mock modules that return our mock backend
-        mock_cerberus_module = MagicMock()
-        mock_cerberus_client_module = MagicMock()
-        mock_cerberus_client_module.CerberusClient = MagicMock(return_value=mock_backend)
-        mock_cerberus_module.client = mock_cerberus_client_module
-
-        # Patch sys.modules during initialization
-        with patch.dict(
-            sys.modules,
-            {"cerberus": mock_cerberus_module, "cerberus.client": mock_cerberus_client_module},
-        ):
-            client = CerberusSecretClient(settings)
-
-        return client
-
-    def test_cerberus_get_secret_success(self):
-        """Test retrieving a single secret from Cerberus."""
-        client = self._create_test_client()
-        result = client.get_secret("password")
-
-        assert result.is_ok()
-        assert result.unwrap() == "secret123"
-
-    def test_cerberus_get_secret_not_found(self):
-        """Test retrieving a non-existent secret."""
-        client = self._create_test_client()
-        result = client.get_secret("nonexistent")
-
-        assert result.is_err()
-        assert "not found" in result.get_error().lower()
-
-    def test_cerberus_get_secrets_multiple(self):
-        """Test retrieving multiple secrets."""
-        client = self._create_test_client()
-        result = client.get_secrets("shared/database/mysql")
-
-        assert result.is_ok()
-        secrets = result.unwrap()
-        assert secrets["password"] == "secret123"
-        assert secrets["username"] == "admin"
-
-    def test_cerberus_get_secret_by_key(self):
-        """Test retrieving a secret by key."""
-        client = self._create_test_client()
-        result = client.get_secret_by_key("shared/database/mysql", "username")
-
-        assert result.is_ok()
-        assert result.unwrap() == "admin"
-
-    def test_cerberus_secret_exists(self):
-        """Test checking if secret exists."""
-        client = self._create_test_client()
-
-        # Secret exists
-        result_exists = client.secret_exists("password")
-        assert result_exists.is_ok()
-        assert result_exists.unwrap() is True
-
-        # Secret doesn't exist
-        result_not_exists = client.secret_exists("nonexistent")
-        assert result_not_exists.is_ok()
-        assert result_not_exists.unwrap() is False
-
-    def test_cerberus_list_secrets(self):
-        """Test listing secrets."""
-        client = self._create_test_client()
-        result = client.list_secrets("shared/database/mysql")
-
-        assert result.is_ok()
-        keys = result.unwrap()
-        assert "password" in keys
-        assert "username" in keys
-
-    def test_cerberus_put_secret_not_supported(self):
-        """Test that put_secret returns error (not supported)."""
-        client = self._create_test_client()
-        result = client.put_secret("new_secret", "value")
-
-        assert result.is_err()
-        assert "not support write" in result.get_error()
-
-    def test_cerberus_delete_secret_not_supported(self):
-        """Test that delete_secret returns error (not supported)."""
-        client = self._create_test_client()
-        result = client.delete_secret("some_secret")
-
-        assert result.is_err()
-        assert "not support delete" in result.get_error()
-
-    def test_cerberus_put_secrets_not_supported(self):
-        """Test that put_secrets returns error (not supported)."""
-        client = self._create_test_client()
-        result = client.put_secrets("path", {"key": "value"})
-
-        assert result.is_err()
-        assert "not support write" in result.get_error()
-
-    def test_cerberus_delete_secrets_not_supported(self):
-        """Test that delete_secrets returns error (not supported)."""
-        client = self._create_test_client()
-        result = client.delete_secrets("path/")
-
-        assert result.is_err()
-        assert "not support delete" in result.get_error()
-
-    def test_cerberus_get_secrets_path_not_found(self):
-        """Test error when path doesn't exist."""
-        client = self._create_test_client()
-        result = client.get_secrets("nonexistent/path")
-
-        assert result.is_err()
-        assert "not found" in result.get_error().lower() or "path" in result.get_error().lower()
 
 
 class TestAWSKMSImplementation:
@@ -1343,10 +1141,9 @@ class TestFactoryErrorHandling:
             pass
 
         # Should return Err or handle gracefully
-        result = SecretsClientFactory.create(SecretsClientType.CERBERUS, WrongSettings())
+        result = SecretsClientFactory.create(SecretsClientType.LOCAL, WrongSettings())
 
-        # Either Ok (if not strict) or Err
-        assert result.is_ok() or result.is_err()
+        assert result.is_err()
 
 
 if __name__ == "__main__":

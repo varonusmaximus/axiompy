@@ -15,7 +15,7 @@ Python package [`axiompy`](axiompy/):
 | Database / object storage / files | [`axiompy/io/`](axiompy/io/) | CRUD abstractions, YAML/JSON helpers |
 | JSON-RPC | [`axiompy/io/jsonrpc.py`](axiompy/io/jsonrpc.py) | Client + batch |
 | Servers | [`axiompy/servers/`](axiompy/servers/) | `ServerFactory`, MCP, JSON-RPC |
-| Secrets | [`axiompy/secrets/`](axiompy/secrets/) | Factory + Cerberus, AWS, Azure, local |
+| Secrets | [`axiompy/secrets/`](axiompy/secrets/) | Factory + AWS (Secrets Manager, KMS), local `.env` |
 | Cross-cutting | [`axiompy/validators.py`](axiompy/validators.py), [`axiompy/decorators.py`](axiompy/decorators.py), [`axiompy/loggers.py`](axiompy/loggers.py), [`axiompy/result.py`](axiompy/result.py), [`axiompy/web.py`](axiompy/web.py) | |
 | Cursor skills CLI | [`axiompy/cli/cursor_skills.py`](axiompy/cli/cursor_skills.py) | Syncs bundled skills to `~/.cursor/skills` |
 

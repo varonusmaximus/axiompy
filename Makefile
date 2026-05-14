@@ -50,7 +50,7 @@ help:
 	@echo "  make lint                    - Run ruff and pylint"
 	@echo "  make typecheck               - Run mypy type checker"
 	@echo "  make security                - Run bandit and pip-audit"
-	@echo "  make ci-local                - Run Ruff, pre-commit, tests+coverage, security (matches CI)"
+	@echo "  make ci-local                - Run Ruff, mypy, pre-commit, tests+coverage, security (matches CI)"
 	@echo "  make clean                   - Clean build artifacts"
 	@echo "  make clean-all [name]        - Clean and remove venv (default: venv)"
 	@echo "  make build                   - Build distribution package (poetry build)"
@@ -277,7 +277,7 @@ lint:
 
 typecheck:
 	@echo "Running type checker..."
-	mypy axiompy/ --ignore-missing-imports
+	mypy axiompy/ --config-file pyproject.toml
 
 security:
 	@echo "Running security scans..."
@@ -292,15 +292,17 @@ ci-local:
 	fi
 	@set -e; VP=./$(VENV_DETECT)/bin; \
 	echo "Using venv: $(VENV_DETECT)"; \
-	echo ""; echo "== 1/4 Ruff (CI lint job) =="; \
+	echo ""; echo "== 1/5 Ruff (CI lint job) =="; \
 	$$VP/ruff check . --config pyproject.toml; \
 	$$VP/ruff format --check . --config pyproject.toml; \
-	echo ""; echo "== 2/4 Pre-commit (all hooks, all files) =="; \
+	echo ""; echo "== 2/5 Mypy (CI lint job) =="; \
+	$$VP/mypy axiompy/ --config-file pyproject.toml; \
+	echo ""; echo "== 3/5 Pre-commit (all hooks, all files) =="; \
 	$$VP/pre-commit run --all-files; \
-	echo ""; echo "== 3/4 Pytest + coverage (CI test job) =="; \
+	echo ""; echo "== 4/5 Pytest + coverage (CI test job) =="; \
 	$$VP/pytest tests/ --cov=axiompy --cov-report=xml --cov-report=term; \
 	$$VP/coverage report --fail-under=80; \
-	echo ""; echo "== 4/4 Bandit + pip-audit (CI security job) =="; \
+	echo ""; echo "== 5/5 Bandit + pip-audit (CI security job) =="; \
 	$$VP/bandit -c pyproject.toml -r axiompy/ -ll; \
 	$$VP/pip-audit; \
 	echo ""; echo "✓ ci-local: all checks passed (matches GitHub Actions)."

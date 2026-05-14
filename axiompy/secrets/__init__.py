@@ -2,7 +2,7 @@
 Secrets and credential management module for axiompy.
 
 Provides a unified interface for managing secrets, credentials, and authentication tokens
-across multiple backends (Cerberus, AWS KMS, AWS Secrets Manager, HashiCorp Vault, Azure Key Vault).
+across multiple backends (AWS KMS, AWS Secrets Manager, local `.env`, and other vault-style systems).
 
 Features:
     - Multiple secret backend support with factory pattern
@@ -12,18 +12,13 @@ Features:
     - Support for both simple key-value secrets and complex credential objects
 
 Quick Example:
-    >>> from axiompy.secrets import SecretsClientFactory, SecretsClientType, CerberusSettings
-    >>> settings = CerberusSettings(
-    ...     vault_path="shared/database/mysql",
-    ...     cerberus_url="https://cerberus.example.com",
-    ...     cerberus_region="us-west-2"
-    ... )
-    >>> client = SecretsClientFactory.create(SecretsClientType.CERBERUS, settings).unwrap()
+    >>> from axiompy.secrets import LocalSettings, SecretsClientFactory, SecretsClientType
+    >>> settings = LocalSettings(env_file=".env")
+    >>> client = SecretsClientFactory.create(SecretsClientType.LOCAL, settings).unwrap()
     >>> secret = client.get_secret("database_password").unwrap()
-    >>> all_secrets = client.get_secrets("shared/database/").unwrap()
+    >>> all_secrets = client.get_secrets("").unwrap()
 
 Supported Backends:
-    - CERBERUS: Acme's centralized secret management system
     - AWS_SECRETS_MANAGER: AWS Secrets Manager
     - AWS_KMS: AWS Key Management Service (encryption)
     - LOCAL: Local .env file backend for development
@@ -40,7 +35,6 @@ from .types import (
     AuthToken,
     AWSKMSSettings,
     AWSSecretsManagerSettings,
-    CerberusSettings,
     Credential,
     LocalSettings,
     SecretsClientType,
@@ -56,7 +50,6 @@ __all__ = [
     # Types and Enums
     "SecretsClientType",
     "SecretsSettings",
-    "CerberusSettings",
     "AWSSecretsManagerSettings",
     "AWSKMSSettings",
     "LocalSettings",

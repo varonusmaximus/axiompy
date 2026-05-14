@@ -7,7 +7,6 @@ The `secrets` module provides a unified, extensible interface for managing secre
 - 🏭 **Factory Pattern**: Easy backend switching without code changes
 - 🚂 **Railway-Oriented Programming**: Result types for elegant error handling
 - 🔐 **Multiple Backends**:
-  - Cerberus (Acme's centralized secret management)
   - AWS Secrets Manager
   - AWS KMS (encryption/decryption)
   - Local `.env` backend for development
@@ -20,20 +19,13 @@ The `secrets` module provides a unified, extensible interface for managing secre
 ### Basic Usage
 
 ```python
-from axiompy.secrets import SecretsClientFactory, SecretsClientType, CerberusSettings
+from axiompy.secrets import LocalSettings, SecretsClientFactory, SecretsClientType
 
-# Create settings for Cerberus
-settings = CerberusSettings(
-    vault_path="shared/database/mysql",
-    cerberus_url="https://cerberus.example.com",
-    cerberus_region="us-west-2"
-)
+settings = LocalSettings(env_file=".env")
 
-# Create client using factory
-result = SecretsClientFactory.create(SecretsClientType.CERBERUS, settings)
+result = SecretsClientFactory.create(SecretsClientType.LOCAL, settings)
 client = result.unwrap()  # Or handle error
 
-# Get a secret
 secret_result = client.get_secret("database_password")
 password = secret_result.unwrap()
 ```
@@ -41,10 +33,10 @@ password = secret_result.unwrap()
 ### Error Handling with Result Types
 
 ```python
-from axiompy.secrets import SecretsClientFactory, SecretsClientType, CerberusSettings
+from axiompy.secrets import LocalSettings, SecretsClientFactory, SecretsClientType
 
-settings = CerberusSettings(...)
-result = SecretsClientFactory.create(SecretsClientType.CERBERUS, settings)
+settings = LocalSettings(env_file=".env")
+result = SecretsClientFactory.create(SecretsClientType.LOCAL, settings)
 
 # Handle error gracefully
 password = (
@@ -64,25 +56,6 @@ else:
 ```
 
 ## Backend Configuration
-
-### Cerberus
-
-Acme's centralized secret management system.
-
-```python
-from axiompy.secrets import SecretsClientFactory, SecretsClientType, CerberusSettings
-
-settings = CerberusSettings(
-    vault_path="shared/database/mysql",
-    cerberus_url="https://cerberus.example.com",
-    cerberus_region="us-west-2",
-    verbose=False
-)
-
-result = SecretsClientFactory.create(SecretsClientType.CERBERUS, settings)
-```
-
-**Installation**: `pip install cerberus-client`
 
 ### AWS Secrets Manager
 
@@ -231,12 +204,13 @@ client.refresh_all_caches()
 ### Pattern 1: Simple Secret Retrieval
 
 ```python
-from axiompy.secrets import SecretsClientFactory, SecretsClientType, CerberusSettings
+from axiompy.secrets import LocalSettings, SecretsClientFactory, SecretsClientType
+
 
 def get_database_password() -> str:
-    settings = CerberusSettings(...)
+    settings = LocalSettings(env_file=".env")
     client = SecretsClientFactory.create(
-        SecretsClientType.CERBERUS, settings
+        SecretsClientType.LOCAL, settings
     ).unwrap()
 
     return client.get_secret("db_password").unwrap()
@@ -275,19 +249,22 @@ for key, value in db_creds.items():
 import os
 from axiompy.secrets import SecretsClientFactory, SecretsClientType
 
-backend = os.getenv("SECRET_BACKEND", "cerberus").lower()
+backend = os.getenv("SECRET_BACKEND", "local").lower()
 client_type = SecretsClientType[backend.upper()]
 
 # Backend-specific settings using match/case (Python 3.10+)
 match client_type:
-    case SecretsClientType.CERBERUS:
-        from axiompy.secrets import CerberusSettings
-        settings = CerberusSettings(...)
+    case SecretsClientType.LOCAL:
+        from axiompy.secrets import LocalSettings
+
+        settings = LocalSettings(env_file=os.getenv("ENV_FILE", ".env"))
     case SecretsClientType.AWS_SECRETS_MANAGER:
         from axiompy.secrets import AWSSecretsManagerSettings
+
         settings = AWSSecretsManagerSettings(...)
     case SecretsClientType.AWS_KMS:
         from axiompy.secrets import AWSKMSSettings
+
         settings = AWSKMSSettings(...)
     case _:
         raise ValueError(f"Unknown backend: {client_type}")
@@ -409,15 +386,15 @@ assert result.unwrap() == "test123"
 
 ## Backend Comparison
 
-| Feature | Cerberus | AWS Secrets Manager | AWS KMS | Local `.env` |
-|---------|----------|---------------------|---------|---------------|
-| **Read Secrets** | ✅ | ✅ | ❌ | ✅ |
-| **Write Secrets** | ❌ | ✅ | ❌ | ❌ |
-| **Delete Secrets** | ❌ | ✅ | ❌ | ❌ |
-| **Encryption** | ✅ | ✅ | ✅ | ❌ |
-| **Rotation** | ✅ | ✅ | ❌ | ❌ |
-| **Audit Logging** | ✅ | ✅ | ✅ | ❌ |
-| **Cost** | Low | Low-Med | Low | Very Low |
+| Feature | AWS Secrets Manager | AWS KMS | Local `.env` |
+|---------|----------------------|---------|---------------|
+| **Read Secrets** | ✅ | ❌ | ✅ |
+| **Write Secrets** | ✅ | ❌ | ❌ |
+| **Delete Secrets** | ✅ | ❌ | ❌ |
+| **Encryption** | ✅ | ✅ | ❌ |
+| **Rotation** | ✅ | ❌ | ❌ |
+| **Audit Logging** | ✅ | ✅ | ❌ |
+| **Cost** | Low-Med | Low | Very Low |
 
 ## Error Handling
 
@@ -486,26 +463,27 @@ To add a new backend:
 
 This guide explains how to integrate the `axiompy.secrets` module into projects that currently use direct backend clients.
 
-#### Before (Direct Cerberus)
-```python
-from cerberus.client import CerberusClient
+#### Before (Direct boto3)
 
-cred_mgr = CredentialManager.get_instance()
-token = cred_mgr.get_databricks_token()  # Can throw exceptions
+```python
+import boto3
+
+client = boto3.client("secretsmanager", region_name="us-west-2")
+response = client.get_secret_value(SecretId="prod/db/password")
+password = response["SecretString"]  # Can throw botocore exceptions
 ```
 
 #### After (Using axiompy.secrets)
-```python
-from axiompy.secrets import SecretsClientFactory, SecretsClientType, CerberusSettings
 
-settings = CerberusSettings(
-    vault_path=config.get("CERBERUS_DBX_SDB_KEY"),
-    cerberus_url=config.get("CERBERUS_HOST"),
-    cerberus_region=config.get("CERBERUS_REGION")
+```python
+from axiompy.secrets import AWSSecretsManagerSettings, SecretsClientFactory, SecretsClientType
+
+settings = AWSSecretsManagerSettings(
+    region="us-west-2",
 )
 
 client = SecretsClientFactory.create(
-    SecretsClientType.CERBERUS, settings
+    SecretsClientType.AWS_SECRETS_MANAGER, settings
 ).unwrap()
 ```
 
@@ -523,9 +501,9 @@ class MyAPIServer:
 
     def startup(self):
         """Initialize secrets client on server startup."""
-        settings = ...  # Your settings
+        settings = LocalSettings(env_file=".env")
         self.secrets_client = SecretsClientFactory.create(
-            SecretsClientType.CERBERUS, settings
+            SecretsClientType.LOCAL, settings
         ).unwrap()
 
     def get_secret_client(self) -> CredentialProvider:
@@ -557,30 +535,29 @@ class SecretsConfig:
     def get_client() -> Result:
         """Get configured secret client based on environment."""
 
-        backend = os.getenv("SECRET_BACKEND", "cerberus").upper()
+        backend = os.getenv("SECRET_BACKEND", "LOCAL").upper()
         client_type = SecretsClientType[backend]
 
         # Backend-specific settings using match/case (Python 3.10+)
         match client_type:
-            case SecretsClientType.CERBERUS:
-                from axiompy.secrets import CerberusSettings
-                settings = CerberusSettings(
-                    vault_path=os.getenv("CERBERUS_VAULT_PATH"),
-                    cerberus_url=os.getenv("CERBERUS_URL"),
-                    cerberus_region=os.getenv("CERBERUS_REGION")
-                )
+            case SecretsClientType.LOCAL:
+                from axiompy.secrets import LocalSettings
+
+                settings = LocalSettings(env_file=os.getenv("ENV_FILE", ".env"))
             case SecretsClientType.AWS_SECRETS_MANAGER:
                 from axiompy.secrets import AWSSecretsManagerSettings
+
                 settings = AWSSecretsManagerSettings(
                     region=os.getenv("AWS_REGION", "us-west-2"),
                     access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-                    secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
+                    secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
                 )
             case SecretsClientType.AWS_KMS:
                 from axiompy.secrets import AWSKMSSettings
+
                 settings = AWSKMSSettings(
                     key_id=os.getenv("AWS_KMS_KEY_ID"),
-                    region=os.getenv("AWS_REGION", "us-west-2")
+                    region=os.getenv("AWS_REGION", "us-west-2"),
                 )
             case _:
                 raise ValueError(f"Unknown backend: {client_type}")
@@ -718,16 +695,12 @@ assert result.unwrap() == "test-token"
 #### Issue: Backend Import Not Available
 **Solution**: Install the appropriate backend dependency:
 ```bash
-pip install cerberus-client    # For Cerberus
 pip install boto3              # For AWS Secrets Manager & KMS
 ```
 
 #### Issue: Authentication Fails
 **Solution**: Verify credentials and permissions:
 ```bash
-# For Cerberus
-curl -H "Authorization: Bearer $TOKEN" https://cerberus.example.com/health
-
 # For AWS
 aws sts get-caller-identity
 ```
@@ -748,7 +721,7 @@ The secrets module uses **Moto** for comprehensive AWS testing without requiring
 - **Overall**: 81.02% (81 tests)
 - **AWS KMS**: 84.15% (9 tests)
 - **AWS Secrets Manager**: 70.40% (19 tests)
-- **Cerberus**: 77.05% (includes mocked backend tests)
+- **Local `.env`**: integration tests in `tests/test_local_secrets.py`
 - **Types**: 100% (perfect coverage)
 - **Client**: 100% (perfect coverage)
 
@@ -782,13 +755,9 @@ The test suite (`tests/test_secrets_integration.py`) includes:
 - AuthToken serialization
 - Dataclass validation
 
-#### Cerberus Tests (6 tests)
-- Mock backend integration
-- Secret retrieval and JSON parsing
-- Key extraction from secrets
-- Existence checking
-- List operations
-- Error handling
+#### Local `.env` tests
+
+See `tests/test_local_secrets.py` for read-only `.env` parsing and lookups.
 
 #### AWS KMS Tests (9 tests)
 - Encrypt/decrypt operations
@@ -859,69 +828,63 @@ class TestYourBackend:
 - **No network calls**: All tests use mocked AWS services
 - **No external dependencies**: Moto already in requirements-dev.txt
 
-## Local `.env` backend (implementation plan)
+## Local `.env` backend
 
-> Add a `LOCAL` backend to `axiompy.secrets` that reads secrets from a `.env` file using the same
-> `SecretsClient` interface. This eliminates the split between Cerberus-in-production and
-> env-vars-in-dev — local development uses the same key names, same code path, different backend.
+> The `LOCAL` backend reads secrets from a `.env` file using the same `SecretsClient` interface as
+> AWS and other remote vaults — local development uses the same key names, same code path, different backend.
 
 ### Motivation
 
-Currently, applications that use `axiompy.secrets` have two code paths:
+Typical split without `LOCAL`:
 
-- **Production**: `SecretsClientFactory.create(SecretsClientType.CERBERUS, settings)` reads from Cerberus SDB
+- **Production**: `SecretsClientFactory.create(SecretsClientType.AWS_SECRETS_MANAGER, settings)` (or another remote backend)
 - **Local dev**: `os.environ.get("AD_BIND_PASSWORD")` reads from env vars or `.env` files
 
-This means secret key names can drift between environments (e.g. `ad_bind_password` in Cerberus
+This means secret key names can drift between environments (e.g. `ad_bind_password` in a vault
 vs `AD_BIND_PASSWORD` in env). The `LOCAL` backend unifies them: same factory, same key names,
-same `SecretsClient` interface — backed by a `.env` file instead of a vault.
+same `SecretsClient` interface — backed by a `.env` file instead of a remote API.
 
 ```python
-# Production
-client = SecretsClientFactory.create(SecretsClientType.CERBERUS, CerberusSettings(
-    vault_path="app/data-product-registry/secrets",
-    cerberus_url="https://cerberus.example.com",
-    cerberus_region="us-west-2",
-)).unwrap()
+# Production (example: AWS Secrets Manager)
+from axiompy.secrets import AWSSecretsManagerSettings, SecretsClientFactory, SecretsClientType
+
+client = SecretsClientFactory.create(
+    SecretsClientType.AWS_SECRETS_MANAGER,
+    AWSSecretsManagerSettings(region="us-west-2"),
+).unwrap()
 
 # Local — same interface, same key names, reads from .env file
 client = SecretsClientFactory.create(SecretsClientType.LOCAL, LocalSettings(
     env_file=".env",
-    vault_path="app/data-product-registry/secrets",  # ignored but kept for parity
+    vault_path="app/data-product-registry/secrets",  # optional parity field
 )).unwrap()
 
-# Both return the same thing:
 token = client.get_secret("authz_api_token").unwrap()
-all_secrets = client.get_secrets("app/data-product-registry/secrets").unwrap()
 ```
 
-### Files to create or modify
-
-#### 1. `axiompy/secrets/types.py` — Add `LOCAL` to enum and `LocalSettings`
+### Types reference
 
 ```python
 class SecretsClientType(Enum):
-    CERBERUS = "cerberus"
     AWS_SECRETS_MANAGER = "aws_secrets_manager"
     AWS_KMS = "aws_kms"
-    LOCAL = "local"                           # <-- new
+    LOCAL = "local"
 
 @dataclass
 class LocalSettings(SecretsSettings):
-    """Local .env file backend for development."""
     env_file: str = ".env"
-    vault_path: str = ""                      # kept for interface parity, not used
-    case_insensitive: bool = True             # map KEY=val to both "KEY" and "key"
+    vault_path: str = ""
+    case_insensitive: bool = True
 ```
 
-#### 2. `axiompy/secrets/implementations/local.py` — New file
+#### 2. `axiompy/secrets/implementations/local.py`
 
 Implement `LocalSecretClient(CredentialProvider)` that:
 
 - On `__init__`, reads the `.env` file into a `dict[str, str]`
 - Parsing: strips comments (`#`), skips blank lines, handles `KEY=value` and `KEY="value"`
 - When `case_insensitive=True`, stores both `KEY` and `key` variants so lookups match
-  Cerberus key names (lowercase) and env var names (uppercase)
+  typical lowercase secret keys and uppercase environment variable names
 - Implements all `SecretsClient` methods:
 
 | Method | Behavior |
@@ -940,7 +903,7 @@ Implement `LocalSecretClient(CredentialProvider)` that:
 class LocalSecretClient(CredentialProvider):
     """Read secrets from a local .env file.
 
-    Provides the same SecretsClient interface as Cerberus, AWS Secrets Manager, etc.
+    Provides the same SecretsClient interface as AWS Secrets Manager and other backends.
     Used for local development so the same key names and code paths work in all
     environments.
     """
@@ -1076,11 +1039,10 @@ def test_local_client_write_returns_error(tmp_path):
 
 ### `.env` file convention
 
-The `.env` file uses the **same key names as Cerberus** (lowercase) so the application code
-works identically in both environments:
+The `.env` file can use **lowercase key names** so application code matches common vault conventions:
 
 ```bash
-# Secrets (same keys as Cerberus SDB at app/data-product-registry/secrets)
+# Secrets (example keys aligned with a remote vault path)
 authz_api_token=63be72af-fc2e-4a32-87b4-b28d2058804f
 ad_bind_password=my-ldap-password
 snowflake_account=acme.us-east-1
@@ -1097,33 +1059,32 @@ QUERY_EXECUTOR_TYPE=duckdb
 ```
 
 The `case_insensitive=True` default means `get_secret("authz_api_token")` and
-`get_secret("AUTHZ_API_TOKEN")` both resolve, so existing env var conventions and Cerberus
-lowercase conventions both work.
+`get_secret("AUTHZ_API_TOKEN")` both resolve, so uppercase env var names and lowercase secret keys
+both work.
 
 ### Consumer usage (Data Product Registry)
 
 After this is implemented, `settings_builder.py` simplifies to:
 
 ```python
-from axiompy.secrets import SecretsClientFactory, SecretsClientType, CerberusSettings, LocalSettings
+from axiompy.secrets import LocalSettings, SecretsClientFactory, SecretsClientType
 
-CERBERUS_URL = "https://cerberus.example.com"
-CERBERUS_REGION = "us-west-2"
-CERBERUS_VAULT_PATH = "app/data-product-registry/secrets"
 
 def _create_secrets_client():
-    """Create secrets client — Cerberus in production, .env locally."""
-    if os.environ.get("CERBERUS_ENABLED", "false").lower() == "true":
-        settings = CerberusSettings(
-            vault_path=CERBERUS_VAULT_PATH,
-            cerberus_url=CERBERUS_URL,
-            cerberus_region=CERBERUS_REGION,
-        )
-        return SecretsClientFactory.create(SecretsClientType.CERBERUS, settings).unwrap()
+    """Create secrets client — remote vault in production, .env locally."""
+    import os
+
+    if os.environ.get("USE_LOCAL_SECRETS", "false").lower() == "true":
+        return SecretsClientFactory.create(
+            SecretsClientType.LOCAL,
+            LocalSettings(env_file=os.getenv("ENV_FILE", ".env")),
+        ).unwrap()
+
+    from axiompy.secrets import AWSSecretsManagerSettings
 
     return SecretsClientFactory.create(
-        SecretsClientType.LOCAL,
-        LocalSettings(env_file=".env"),
+        SecretsClientType.AWS_SECRETS_MANAGER,
+        AWSSecretsManagerSettings(region=os.getenv("AWS_REGION", "us-west-2")),
     ).unwrap()
 ```
 
