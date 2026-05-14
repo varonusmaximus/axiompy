@@ -1,4 +1,4 @@
-# Development dependencies for the axiompy core repo.
+# Development dependencies for the axiompy core repo (Python >= 3.12).
 #
 # Typical setup:
 #   pip install -r requirements-dev.txt
@@ -17,6 +17,7 @@ flake8>=6.0.0
 mypy>=1.4.0
 ruff>=0.1.0
 bandit>=1.8.6
+pip-audit>=2.6.0
 
 # Git hooks — wired into `make venv` via `pre-commit install`
 pre-commit>=3.5.0

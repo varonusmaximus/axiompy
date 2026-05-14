@@ -1,4 +1,4 @@
-.PHONY: help venv install test coverage lint typecheck security clean clean-all build mcp-example review rag-install rag-ingest rag-query rag-chat rag-stats rag-api precommit-install 1 2 3
+.PHONY: help venv install test coverage lint typecheck security clean clean-all build mcp-example review rag-install rag-ingest rag-query rag-chat rag-stats rag-api precommit-install ci-local 1 2 3
 
 # Virtual environment name (can be overridden)
 # Usage: make venv [name] or make venv env_name=name
@@ -21,6 +21,8 @@ VENV_DETECT := $(shell \
 		echo "$(env_name)"; \
 	elif [ -d "venv" ] && [ -f "venv/bin/activate" ]; then \
 		echo "venv"; \
+	elif [ -d ".ci-venv" ] && [ -f ".ci-venv/bin/activate" ]; then \
+		echo ".ci-venv"; \
 	elif [ -d "server" ] && [ -f "server/bin/activate" ]; then \
 		echo "server"; \
 	elif [ -d "logger" ] && [ -f "logger/bin/activate" ]; then \
@@ -34,19 +36,21 @@ VENV_DETECT := $(shell \
 		done; \
 	fi)
 
-# Python executable to use
-PYTHON := $(if $(VENV_DETECT),./$(VENV_DETECT)/bin/python,python3)
+# Python for targets without an activated venv (must be >= 3.12 on PATH).
+PYTHON := $(if $(VENV_DETECT),./$(VENV_DETECT)/bin/python,python3.12)
 
 help:
 	@echo "axiompy - Makefile commands"
 	@echo ""
-	@echo "  make venv [name]             - Create virtual environment (default: venv)"
+	@echo "  make venv [name]             - Create venv with Python >= 3.12 (default: venv)"
+	@echo "      VENV_PYTHON=/path/to/python3.12  - if python3.12 is not on PATH"
 	@echo "  make install [env_name=name] - Install package in dev mode to venv"
 	@echo "  make test [env_name=name]    - Run tests using venv"
 	@echo "  make coverage [env_name=name]- Run tests with coverage using venv"
 	@echo "  make lint                    - Run ruff and pylint"
 	@echo "  make typecheck               - Run mypy type checker"
 	@echo "  make security                - Run bandit and pip-audit"
+	@echo "  make ci-local                - Run Ruff, pre-commit, tests+coverage, security (matches CI)"
 	@echo "  make clean                   - Clean build artifacts"
 	@echo "  make clean-all [name]        - Clean and remove venv (default: venv)"
 	@echo "  make build                   - Build distribution package (poetry build)"
@@ -86,7 +90,7 @@ help:
 	@echo ""
 	@echo "Note: test/install/coverage auto-detect venv in this order:"
 	@echo "      1) Currently activated venv (VIRTUAL_ENV)"
-	@echo "      2) env_name parameter > venv > server > logger"
+	@echo "      2) env_name parameter > venv > .ci-venv > server > logger"
 	@echo "      3) Any directory with bin/activate"
 
 # Code Review (requires axiompy-agents installed in the active venv)
@@ -199,11 +203,13 @@ rag-api:
 	@$(PYTHON) -m axiompy.agents.rag.applications.api
 
 venv:
-	@if [ -d "$(env_name)" ]; then \
+	@PY=$$("$(CURDIR)/scripts/resolve_python312.sh"); \
+	echo "Using $$PY for virtualenv ($$($$PY -V))..."; \
+	if [ -d "$(env_name)" ]; then \
 		echo "Virtual environment '$(env_name)' already exists, updating..."; \
 	else \
 		echo "Creating virtual environment: $(env_name)..."; \
-		python3 -m venv $(env_name); \
+		$$PY -m venv $(env_name); \
 		echo "Virtual environment created!"; \
 	fi
 	@echo "Upgrading pip..."
@@ -278,6 +284,27 @@ security:
 	bandit -c pyproject.toml -r axiompy/ -ll
 	pip-audit
 
+# Match .github/workflows/python-ci.yml (lint + test + security) and pre-commit run --all-files.
+ci-local:
+	@if [ -z "$(VENV_DETECT)" ]; then \
+		echo >&2 "No venv found. Run: make venv   then: source venv/bin/activate"; \
+		exit 1; \
+	fi
+	@set -e; VP=./$(VENV_DETECT)/bin; \
+	echo "Using venv: $(VENV_DETECT)"; \
+	echo ""; echo "== 1/4 Ruff (CI lint job) =="; \
+	$$VP/ruff check . --config pyproject.toml; \
+	$$VP/ruff format --check . --config pyproject.toml; \
+	echo ""; echo "== 2/4 Pre-commit (all hooks, all files) =="; \
+	$$VP/pre-commit run --all-files; \
+	echo ""; echo "== 3/4 Pytest + coverage (CI test job) =="; \
+	$$VP/pytest tests/ --cov=axiompy --cov-report=xml --cov-report=term; \
+	$$VP/coverage report --fail-under=80; \
+	echo ""; echo "== 4/4 Bandit + pip-audit (CI security job) =="; \
+	$$VP/bandit -c pyproject.toml -r axiompy/ -ll; \
+	$$VP/pip-audit; \
+	echo ""; echo "✓ ci-local: all checks passed (matches GitHub Actions)."
+
 clean:
 	rm -rf build/ dist/ *.egg-info .pytest_cache/ .coverage htmlcov/
 	rm -rf axiompy/*.egg-info
@@ -309,7 +336,8 @@ mcp-example: ## AI Demo: make mcp-example [1|2|3] - 1=qwen2.5-coder:1.5b, 2=deep
 	@echo ""
 	@if [ -z "$(VENV_DETECT)" ]; then \
 		echo "Step 1: Creating virtual environment..."; \
-		python3 -m venv venv; \
+		PY=$$("$(CURDIR)/scripts/resolve_python312.sh"); \
+		$$PY -m venv venv; \
 		VENV_PATH=venv; \
 		echo "✓ Virtual environment created"; \
 	else \

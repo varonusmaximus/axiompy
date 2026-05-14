@@ -37,7 +37,7 @@ This example demonstrates the core concepts of AxiomPy's reasoning module:
 
 ### Prerequisites
 
-1. **Python 3.10+**
+1. **Python 3.12+**
 2. **AxiomPy installed**
    ```bash
    cd /Users/JVaron/code/axiompy

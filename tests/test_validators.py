@@ -4,7 +4,7 @@ Unit tests for the validators module.
 Run with: pytest test_validators.py -v
 """
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone, UTC
 
 import pytest
 
@@ -414,14 +414,14 @@ class TestEnsureDateTime:
             ensure_datetime(date.today())
 
     def test_tz_aware(self):
-        ensure_datetime_tz_aware(datetime.now(timezone.utc))
+        ensure_datetime_tz_aware(datetime.now(UTC))
         with pytest.raises(ValidationError, match="timezone-aware"):
             ensure_datetime_tz_aware(datetime.utcnow())
 
     def test_tz_naive(self):
         ensure_datetime_tz_naive(datetime.utcnow())
         with pytest.raises(ValidationError, match="timezone-naive"):
-            ensure_datetime_tz_naive(datetime.now(timezone.utc))
+            ensure_datetime_tz_naive(datetime.now(UTC))
 
     def test_not_in_future(self):
         ensure_date_not_in_future(date.today())

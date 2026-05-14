@@ -11,7 +11,7 @@ AxiomPy is a comprehensive library of reusable utilities for Python applications
 ## Code Style & Formatting
 
 ### General
-- Use Python 3.10+ compatible code
+- Use Python 3.12+ compatible code
 - Format with `black` and lint with `ruff`
 - Maximum line length: 100 characters
 - Use type hints for ALL function parameters and return types

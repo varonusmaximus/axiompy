@@ -3,8 +3,7 @@ Async HTTP client with batched concurrent requests and transport-agnostic outcom
 
 Uses ``httpx`` behind the API. Install: ``pip install 'axiompy[http-async]'``.
 
-On Python 3.11+, use :class:`http.HTTPMethod` for batch verbs. On 3.10, this module
-re-exports a compatible :data:`HTTPMethod` enum with the same member names.
+Batch verbs use :class:`http.HTTPMethod` from the standard library.
 
 Quick example:
     >>> from http import HTTPMethod  # or: from axiompy.io.http_async import HTTPMethod
@@ -27,9 +26,9 @@ from __future__ import annotations
 
 import asyncio
 import json
-import sys
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
+from http import HTTPMethod
 from typing import Any, Dict, List, Optional, Protocol, Tuple, Union, runtime_checkable
 
 from axiompy.io.http import HTTPClientSettings
@@ -37,21 +36,6 @@ from axiompy.loggers import LoggerFactory
 from axiompy.validators import ensure_in_range, ensure_not_empty
 
 logger = LoggerFactory.create_logger(__name__)
-
-if sys.version_info >= (3, 11):
-    from http import HTTPMethod
-else:
-
-    class HTTPMethod(str, Enum):
-        """Subset of HTTP verbs for batch API (Python 3.10 shim for ``http.HTTPMethod``)."""
-
-        GET = "GET"
-        HEAD = "HEAD"
-        POST = "POST"
-        PUT = "PUT"
-        PATCH = "PATCH"
-        DELETE = "DELETE"
-        OPTIONS = "OPTIONS"
 
 
 try:
@@ -77,7 +61,7 @@ def _method_to_str(method: Union[HTTPMethod, str]) -> str:
     return str(method)
 
 
-class HTTPExchangeStatus(str, Enum):
+class HTTPExchangeStatus(StrEnum):
     """Terminal status of a single exchange in a batch."""
 
     COMPLETE = "complete"
