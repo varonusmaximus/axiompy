@@ -36,6 +36,7 @@ Long methods (>~50 lines), deep nesting (>4 levels), magic numbers, copy-paste, 
 - [ ] **Secrets:** `SecretsClientFactory` — no ad hoc env reads scattered in library code
 - [ ] **REST / HTTP APIs** (when applicable): resource-oriented paths; soft delete via `DELETE`; avoid verb-shaped URLs — align with **`AGENTS.md`**
 - [ ] No Mermaid blocks in long-lived markdown docs (use images)
+- [ ] **README co-update:** every touched `axiompy/<area>/`, `examples/<name>/`, or workflow has matching `README.md` updates (install extras, breaking API, CI) — see **documentation** skill
 
 ## More examples
 

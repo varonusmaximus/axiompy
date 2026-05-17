@@ -6,7 +6,7 @@ Workflows for the **axiompy** repository (**Python 3.12+**; all CI jobs use **3.
 
 | File | When it runs | Purpose |
 |------|----------------|----------|
-| [`python-ci.yml`](python-ci.yml) | Push/PR to `main` or `develop`, or **manual** `workflow_dispatch` | **Ruff** (lint + format), **pytest + coverage** on **Python 3.12** (80% gate), **Bandit** + **pip-audit** |
+| [`python-ci.yml`](python-ci.yml) | Push/PR to `main` or `develop`, or **manual** `workflow_dispatch` | **Ruff** (lint + format), **minimal `tests/test_web.py`** without FastAPI, **full pytest + coverage** on **Python 3.12** (80% gate), **Bandit** + **pip-audit** |
 
 There is **no** automated release or Artifactory publish workflow. Publish wheels/sdists from your machine (e.g. `poetry build` / `pip build`) or add a separate PyPI workflow later.
 
@@ -36,7 +36,7 @@ pre-commit run --all-files
 
 ## Forks / personal repos
 
-- CI installs dependencies from **PyPI** only (`pip install -e ".[...]"`).
+- CI installs dependencies from **PyPI** only: `pip install -e .` + `tests/test_web.py` (proves core web works without FastAPI), then `pip install -e ".[dev,io,servers]"` for the full suite.
 - No Artifactory or private index is required for this workflow.
 
 ## References

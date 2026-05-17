@@ -15,32 +15,29 @@ The `axiompy.io` package provides production-ready utilities for common I/O oper
 
 ## Installation
 
-Basic functionality requires no additional dependencies:
+Base install includes **Pydantic** (for `axiompy.web` and validators). File helpers in this package work without extra deps:
+
 ```bash
 pip install axiompy
 ```
 
-Optional dependencies:
+**I/O stack (recommended):** install the `[io]` extra for HTTP, databases, object storage, and YAML in one step:
+
 ```bash
-# File I/O
-pip install pyyaml        # For YAML file support
-
-# Database
-pip install psycopg2-binary         # For PostgreSQL
-pip install mysql-connector-python  # For MySQL
-pip install boto3                   # For DynamoDB
-
-# Object Storage
-pip install boto3                   # For AWS S3
-pip install google-cloud-storage    # For Google Cloud Storage
-pip install azure-storage-blob      # For Azure Blob Storage
-
-# Or install all storage providers at once
-pip install axiompy[storage]
-
-# Future
-pip install requests      # For HTTP operations
+pip install "axiompy[io]"
 ```
+
+Granular extras (also included in `[io]`):
+
+```bash
+pip install "axiompy[http]"           # requests
+pip install "axiompy[http-async]"       # httpx
+pip install "axiompy[yaml]"           # pyyaml
+pip install "axiompy[databases]"      # postgres, mysql, dynamodb drivers
+pip install "axiompy[storage]"        # s3, gcs, azure blob
+```
+
+Web servers (Flask/FastAPI) are **not** in `[io]` — use `pip install "axiompy[servers]"` (see [`axiompy/servers/README.md`](../servers/README.md)).
 
 ---
 
@@ -1556,7 +1553,7 @@ Shorthand: **`add_get(url, headers=..., params=...)`** and **`add_post(url, json
 #### Testing (`tests/test_http_async.py`)
 
 - **Unit / mock-transport tests** exercise batch fluency, parsing helpers, **`MockAsyncHTTPClient`**, and error paths without real I/O.
-- **Integration tests** start a loopback **uvicorn** server whose routes are registered only through **`axiompy.servers.ServerFactory`** and **`@server.route`** (tuple **`(body, status_code)`** for errors). They require **`fastapi`**, **`uvicorn`**, and **`httpx`** (e.g. dev / **`test-all`** install). Set **`AXIOMPY_SKIP_ASYNC_HTTP_LOCAL_SERVER=1`** to skip that class in constrained environments.
+- **Integration tests** start a loopback **uvicorn** server whose routes are registered only through **`axiompy.servers.ServerFactory`** and **`@server.route`** (tuple **`(body, status_code)`** for errors). They require **`pip install -e ".[io,servers]"`** (or equivalent: httpx + FastAPI + uvicorn). Set **`AXIOMPY_SKIP_ASYNC_HTTP_LOCAL_SERVER=1`** to skip that class in constrained environments.
 
 ### HTTP Client Methods
 

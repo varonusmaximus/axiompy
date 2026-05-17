@@ -8,6 +8,10 @@ This module provides unified interfaces for:
 - JSON-RPC servers (HTTP, stdio)
 """
 
+from axiompy.servers.fastapi_web import (
+    raise_fastapi_http_exception,
+    register_fastapi_http_response_handler,
+)
 from axiompy.servers.jsonrpc import (
     HTTPJSONRPCServer,
     JSONRPCError,
@@ -54,6 +58,8 @@ __all__ = [
     "ServerFactory",
     "ServerError",
     "RouteHandler",
+    "raise_fastapi_http_exception",
+    "register_fastapi_http_response_handler",
     # MCP Servers
     "MCPServer",
     "MCPServerSettings",

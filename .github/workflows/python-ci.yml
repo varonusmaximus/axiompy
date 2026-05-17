@@ -46,10 +46,19 @@ jobs:
           python-version: "3.12"
           cache: "pip"
 
+      - name: Install package (minimal, web only)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest
+
+      - name: Run web tests without FastAPI
+        run: python -m pytest tests/test_web.py -v
+
       - name: Install package and test tools
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev,servers,databases,storage,http,http-async]"
+          pip install -e ".[dev,io,servers]"
 
       - name: Run tests with coverage
         run: |
@@ -81,7 +90,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install "bandit==1.8.6" pip-audit
-          pip install -e ".[dev,servers,databases,storage,http,http-async]"
+          pip install -e ".[dev,io,servers]"
 
       - name: Run Bandit
         run: bandit -c pyproject.toml -r axiompy/ -ll
