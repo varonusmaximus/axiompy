@@ -5,12 +5,12 @@ Tests railway-oriented validation, error handling, pagination, and adapter patte
 """
 
 import pytest
-from fastapi import HTTPException
 from pydantic import BaseModel, Field
 
 from axiompy.result import Err
 from axiompy.web import (
     AdapterPattern,
+    HttpResponseError,
     PaginationHelper,
     ResultConverter,
     ResultErrorHandler,
@@ -231,7 +231,7 @@ class TestResultErrorHandler:
         """Test handling 'not found' error returns 404"""
         result = Err("Resource 123 not found")
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(HttpResponseError) as exc_info:
             ResultErrorHandler.handle_error(result)
 
         assert exc_info.value.status_code == 404
@@ -241,7 +241,7 @@ class TestResultErrorHandler:
         """Test handling validation error returns 400"""
         result = Err("Validation error: invalid email")
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(HttpResponseError) as exc_info:
             ResultErrorHandler.handle_error(result)
 
         assert exc_info.value.status_code == 400
@@ -251,7 +251,7 @@ class TestResultErrorHandler:
         """Test handling conflict error returns 409"""
         result = Err("Email already exists")
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(HttpResponseError) as exc_info:
             ResultErrorHandler.handle_error(result)
 
         assert exc_info.value.status_code == 409
@@ -261,7 +261,7 @@ class TestResultErrorHandler:
         """Test handling generic error uses default status"""
         result = Err("Some random error")
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(HttpResponseError) as exc_info:
             ResultErrorHandler.handle_error(result, default_status=500)
 
         assert exc_info.value.status_code == 500
@@ -271,7 +271,7 @@ class TestResultErrorHandler:
         """Test error detail format"""
         result = Err("Invalid input")
 
-        with pytest.raises(HTTPException) as exc_info:
+        with pytest.raises(HttpResponseError) as exc_info:
             ResultErrorHandler.handle_error(result)
 
         detail = exc_info.value.detail
@@ -486,7 +486,7 @@ class TestWebIntegration:
         assert parse_result.is_err()
 
         # Verify error handling
-        with pytest.raises(HTTPException):
+        with pytest.raises(HttpResponseError):
             ResultErrorHandler.handle_error(parse_result)
 
     def test_pagination_with_models_full_flow(self):

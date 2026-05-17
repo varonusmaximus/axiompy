@@ -21,6 +21,7 @@ include = [
 
 [tool.poetry.dependencies]
 python = ">=3.12,<4.0"
+pydantic = ">=2.0,<3.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.4.0"
@@ -57,7 +58,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
-dependencies = []
+dependencies = ["pydantic>=2.0,<3.0"]
 
 [project.scripts]
 axiompy-skills = "axiompy.cli.cursor_skills:main"
@@ -89,7 +90,16 @@ storage = [
     "azure-storage-blob>=12.19.0",
 ]
 flask = ["flask>=2.3.0"]
-fastapi = ["fastapi>=0.100.0", "uvicorn>=0.23.0", "httpx>=0.27.0"]
+io = [
+    "requests>=2.28.0",
+    "httpx>=0.27.0",
+    "psycopg2-binary>=2.9.0",
+    "mysql-connector-python>=8.0.0",
+    "boto3>=1.26.0",
+    "google-cloud-storage>=2.10.0",
+    "azure-storage-blob>=12.19.0",
+    "pyyaml>=6.0",
+]
 servers = [
     "flask>=2.3.0",
     "fastapi>=0.100.0",
@@ -117,7 +127,21 @@ dev = [
 # Optional: pull sibling distributions from the same index when published separately.
 data = ["axiompy-data>=2.0.0,<3.0.0"]
 agents = ["axiompy-agents>=2.0.0,<3.0.0"]
-all = ["axiompy-data>=2.0.0,<3.0.0", "axiompy-agents>=2.0.0,<3.0.0"]
+all = [
+    "axiompy-data>=2.0.0,<3.0.0",
+    "axiompy-agents>=2.0.0,<3.0.0",
+    "requests>=2.28.0",
+    "httpx>=0.27.0",
+    "psycopg2-binary>=2.9.0",
+    "mysql-connector-python>=8.0.0",
+    "boto3>=1.26.0",
+    "google-cloud-storage>=2.10.0",
+    "azure-storage-blob>=12.19.0",
+    "pyyaml>=6.0",
+    "flask>=2.3.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

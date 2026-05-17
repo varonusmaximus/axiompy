@@ -601,9 +601,11 @@ python mcp_advanced.py
 
 ### Prerequisites
 ```bash
-python 3.8+
-pip install axiompy
+python 3.12+
+pip install "axiompy[servers]"   # Flask, FastAPI, uvicorn, httpx
 ```
+
+For local development from this repo: `pip install -e ".[dev,io,servers]"` (see root `README.md`).
 
 ### Optional: LLM Support (for intelligent validation)
 ```bash

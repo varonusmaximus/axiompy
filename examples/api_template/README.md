@@ -206,6 +206,17 @@ raise ResourceNotFound(
 )
 ```
 
+**Railway-oriented HTTP errors:** `ResultErrorHandler.handle_error` raises `HttpResponseError` from `axiompy.web`. This template registers a FastAPI handler once in `api/main.py`:
+
+```python
+from axiompy.servers import register_fastapi_http_response_handler
+
+app = server.get_app()
+register_fastapi_http_response_handler(app)
+```
+
+Routes can call `ResultErrorHandler.handle_error(result)` without per-route try/except. See [`axiompy/servers/README.md`](../../axiompy/servers/README.md#fastapi-examples).
+
 ### 4. Observability
 Structured logging with execution timing at DEBUG level only:
 
@@ -794,7 +805,10 @@ Make sure `api/` and `services/` directories are Python packages (have `__init__
 Install pytest: `pip install pytest pytest-cov`
 
 **FastAPI not found?**
-Install dependencies: `pip install -r requirements.txt`
+Install dependencies: `pip install -r requirements.txt` or `pip install "axiompy[servers]"` from a published axiompy wheel.
+
+**500 on validation errors after upgrading axiompy?**
+Ensure `register_fastapi_http_response_handler(app)` is called in `api/main.py` (see error handling section above).
 
 **Port already in use?**
 Change API_PORT in `.env` or use different port: `python -m api.main --port 9000`
@@ -809,12 +823,16 @@ See `examples/api_template/` for a complete working example:
 
 ## Dependencies
 
+Core **axiompy** ships Pydantic and `axiompy.web`; FastAPI/uvicorn come from **`axiompy[servers]`** (no separate `[fastapi]` extra).
+
 ```
 fastapi==0.104.0
 uvicorn==0.24.0
 pydantic==2.5.0
 axiompy @ git+https://github.com/varonusmaximus/axiompy.git
 ```
+
+Equivalent install: `pip install "axiompy[servers]"` plus this example's `requirements.txt` pins.
 
 ## Support
 

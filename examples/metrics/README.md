@@ -264,12 +264,10 @@ DELETE /api/v1/metrics/{metric_id}
 ### Prerequisites
 
 ```bash
-# Install dependencies
-pip install fastapi uvicorn requests
+# AxiomPy servers + HTTP (or: pip install -e ".[io,servers]" from axiompy repo)
+pip install "axiompy[io,servers]"
 
-# Optional: For PostgreSQL/MySQL
-pip install psycopg2-binary      # PostgreSQL
-pip install mysql-connector-python  # MySQL
+# This example's requirements.txt may also list pins explicitly
 ```
 
 ### Using curl

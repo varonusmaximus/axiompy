@@ -34,7 +34,12 @@ from api.routes.resources import ResourceRoutes, setup_routes
 from api.routes.resources import router as resources_router
 from axiompy.io.database import DatabaseFactory, DatabaseSettings, DatabaseType
 from axiompy.loggers import LoggerFactory
-from axiompy.servers import ServerFactory, ServerSettings, ServerType
+from axiompy.servers import (
+    ServerFactory,
+    ServerSettings,
+    ServerType,
+    register_fastapi_http_response_handler,
+)
 
 # Initialize logger
 logger = LoggerFactory.create_logger(__name__)
@@ -67,6 +72,7 @@ server = ServerFactory.create(ServerType.FASTAPI, server_settings)
 # modules in axiompy/*, avoid module-level globals - use Factory pattern instead.
 # See AGENTS.md "Global Variables" anti-pattern.
 app = server.get_app()
+register_fastapi_http_response_handler(app)
 
 # Include health routes
 app.include_router(health.router, prefix="/api/v1", tags=["health"])

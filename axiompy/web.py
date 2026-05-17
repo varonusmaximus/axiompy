@@ -1,5 +1,5 @@
 """
-Web framework utilities for FastAPI and other frameworks.
+Web framework utilities for HTTP layers (framework-agnostic).
 
 Provides railway-oriented programming (ROP) helpers for:
 - Input validation with Result[T, E] returns
@@ -11,7 +11,6 @@ Provides railway-oriented programming (ROP) helpers for:
 
 from typing import Any, Callable, Dict, List, Optional, TypeVar
 
-from fastapi import HTTPException
 from pydantic import BaseModel, ValidationError
 
 from axiompy.loggers import LoggerFactory
@@ -21,6 +20,15 @@ T = TypeVar("T")
 E = TypeVar("E")
 
 logger = LoggerFactory.create_logger(__name__)
+
+
+class HttpResponseError(Exception):
+    """Framework-agnostic HTTP error with status code and JSON-serializable detail."""
+
+    def __init__(self, status_code: int, detail: dict[str, Any]) -> None:
+        self.status_code = status_code
+        self.detail = detail
+        super().__init__(detail)
 
 
 class ResultValidator:
@@ -183,14 +191,14 @@ class ResultErrorHandler:
     """
     Generic error handling for Results in HTTP layers.
 
-    Converts Result errors to HTTP exceptions with appropriate status codes
+    Converts Result errors to HTTP response errors with appropriate status codes
     and error formatting.
     """
 
     @staticmethod
     def handle_error(result: Result, default_status: int = 400) -> None:
         """
-        Handle error result by raising appropriate HTTPException.
+        Handle error result by raising HttpResponseError.
 
         Determines status code and error formatting based on error message.
         Call this when result.is_err() to raise the appropriate HTTP error.
@@ -200,7 +208,7 @@ class ResultErrorHandler:
             default_status: Default status code for non-specific errors
 
         Raises:
-            HTTPException: With appropriate status code and formatted error detail
+            HttpResponseError: With appropriate status code and formatted error detail
         """
         error = result.get_error()
         logger.warning(f"HTTP error: {error}")
@@ -220,7 +228,7 @@ class ResultErrorHandler:
             error_code = "ERROR"
 
         error_detail = {"error": error, "error_code": error_code}
-        raise HTTPException(status_code=status_code, detail=error_detail)
+        raise HttpResponseError(status_code=status_code, detail=error_detail)
 
 
 class PaginationHelper:

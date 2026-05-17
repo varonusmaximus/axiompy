@@ -1407,24 +1407,19 @@ Return tuples like `(data, 404)` for custom status codes.
 
 ## Installation
 
-### Core Package
+Base `axiompy` includes **Pydantic** and framework-agnostic **`axiompy.web`** helpers. Flask and FastAPI require the **`[servers]`** extra (there is no separate `[fastapi]` extra).
+
 ```bash
 pip install axiompy
+pip install "axiompy[servers]"   # Flask, FastAPI, uvicorn, httpx
+pip install "axiompy[dev,io,servers]"   # local development (see root README)
 ```
 
-### With Flask
-```bash
-pip install axiompy flask
-```
+Legacy one-off installs still work but prefer extras:
 
-### With FastAPI
 ```bash
-pip install axiompy fastapi uvicorn
-```
-
-### Development (Both)
-```bash
-pip install axiompy flask fastapi uvicorn httpx
+pip install axiompy flask                    # same as [servers] for Flask only
+pip install axiompy fastapi uvicorn httpx    # partial [servers] set
 ```
 
 ---
@@ -1615,6 +1610,21 @@ server.add_middleware(after_middleware)
 ---
 
 ## FastAPI Examples
+
+### `axiompy.web` errors with FastAPI
+
+`ResultErrorHandler.handle_error` raises **`HttpResponseError`** (not `fastapi.HTTPException`). Register a handler once on the app:
+
+```python
+from axiompy.servers import register_fastapi_http_response_handler
+
+app = server.get_app()
+register_fastapi_http_response_handler(app)
+```
+
+For manual conversion in a route: `from axiompy.servers import raise_fastapi_http_exception`.
+
+See [`axiompy/web.py`](../web.py) and [`fastapi_web.py`](fastapi_web.py). Tests: `tests/test_web.py`, `tests/test_fastapi_web.py`.
 
 ### Basic FastAPI Application
 
@@ -2084,9 +2094,9 @@ pip install flask
 
 ### ImportError: No module named 'fastapi'
 
-Install FastAPI and uvicorn:
+Install the servers extra (includes FastAPI, uvicorn, Flask, httpx):
 ```bash
-pip install fastapi uvicorn
+pip install "axiompy[servers]"
 ```
 
 ### Routes not registering correctly
