@@ -1,16 +1,27 @@
 """
 Sync bundled Cursor skills to the local filesystem.
 
-Default target: ``~/.cursor/skills/<skill-name>/``
-Optional:       ``<cwd>/.cursor/skills/<skill-name>/`` via ``--project``
+Copies only **SKILL.md trees** from the ``axiompy_skills`` package into a **single**
+resolved parent directory (e.g. ``~/.cursor/skills``). Does not install ``AGENTS.md``,
+``.cursorrules``, or other repo guidance.
+
+Destination precedence (highest first):
+
+1. ``--dest <path>`` — parent directory for skill folders (``code-review/``, …).
+2. ``--project`` — ``<cwd>/.cursor/skills``.
+3. Environment ``AXIOMPY_SKILLS_DEST`` — path to that same parent directory.
+4. ``[tool.axiompy.skills]`` in the nearest ``pyproject.toml`` walking upward from
+   ``cwd`` — key ``destination``: ``global``, ``project``, or an absolute path string.
+5. Default: ``~/.cursor/skills``.
 
 Usage::
 
-    axiompy-skills                # sync to ~/.cursor/skills/
+    axiompy-skills --show-config   # print resolved destination and exit
+    axiompy-skills                # sync (uses resolved destination)
     axiompy-skills --list         # list bundled skills
     axiompy-skills --dry-run      # preview without writing
-    axiompy-skills --project      # sync into <cwd>/.cursor/skills/
-    axiompy-skills --dest /tmp/x  # sync into a custom directory
+    axiompy-skills --project      # force <cwd>/.cursor/skills/
+    axiompy-skills --dest /tmp/x  # force custom parent directory
     python -m axiompy.cli.cursor_skills   # same as axiompy-skills
 """
 
@@ -18,10 +29,12 @@ from __future__ import annotations
 
 import argparse
 import importlib.resources
+import os
 import shutil
 import sys
+import tomllib
 from pathlib import Path
-from typing import Sequence
+from typing import Iterator, Sequence
 
 _BUNDLE_PACKAGE = "axiompy_skills"
 
@@ -36,7 +49,7 @@ def _bundle_root() -> Path:
     return bundle_path
 
 
-def _default_dest() -> Path:
+def _default_global_dest() -> Path:
     """``~/.cursor/skills``."""
     return Path.home() / ".cursor" / "skills"
 
@@ -48,6 +61,99 @@ def _axiompy_version() -> str:
         return str(__version__)
     except Exception:
         return "unknown"
+
+
+def _iter_directories_for_pyproject(start: Path) -> Iterator[Path]:
+    """Yield start, then parents, until filesystem root."""
+    cur = start.resolve()
+    while True:
+        yield cur
+        parent = cur.parent
+        if parent == cur:
+            break
+        cur = parent
+
+
+def _read_tool_axiompy_skills_destination(pyproject_path: Path) -> str | None:
+    """Return ``destination`` string from ``[tool.axiompy.skills]`` or None."""
+    try:
+        data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, tomllib.TOMLDecodeError):
+        return None
+    tool = data.get("tool")
+    if not isinstance(tool, dict):
+        return None
+    ax = tool.get("axiompy", {})
+    if not isinstance(ax, dict):
+        return None
+    skills = ax.get("skills", {})
+    if not isinstance(skills, dict):
+        return None
+    dest = skills.get("destination")
+    return dest if isinstance(dest, str) else None
+
+
+def _destination_from_pyproject_value(raw: str, cwd: Path) -> Path:
+    """Map ``global`` / ``project`` / path string to a concrete directory."""
+    key = raw.strip()
+    match key:
+        case "global":
+            return _default_global_dest()
+        case "project":
+            return cwd / ".cursor" / "skills"
+        case _:
+            p = Path(key).expanduser()
+            if not p.is_absolute():
+                p = (cwd / p).resolve()
+            return p.resolve()
+
+
+def resolve_skills_destination(
+    *,
+    cwd: Path,
+    dest: Path | None,
+    project: bool,
+) -> tuple[Path, str]:
+    """
+    Resolve the single parent directory for synced skill folders.
+
+    Precedence: ``--dest`` > ``--project`` > ``AXIOMPY_SKILLS_DEST`` >
+    ``[tool.axiompy.skills].destination`` (nearest pyproject.toml upward) >
+    default global directory.
+
+    Args:
+        cwd: Current working directory for ``project`` and relative paths.
+        dest: ``--dest`` value if provided.
+        project: Whether ``--project`` was passed.
+
+    Returns:
+        Tuple of (resolved parent path, source label for diagnostics).
+    """
+    if dest is not None:
+        p = dest.expanduser()
+        if not p.is_absolute():
+            p = (cwd / p).resolve()
+        return p.resolve(), "cli_dest"
+    if project:
+        return (cwd / ".cursor" / "skills").resolve(), "cli_project"
+
+    env_raw = os.environ.get("AXIOMPY_SKILLS_DEST", "").strip()
+    if env_raw:
+        p = Path(env_raw).expanduser()
+        if not p.is_absolute():
+            p = (cwd / p).resolve()
+        return p.resolve(), "env"
+
+    for directory in _iter_directories_for_pyproject(cwd):
+        pyproject = directory / "pyproject.toml"
+        if not pyproject.is_file():
+            continue
+        raw = _read_tool_axiompy_skills_destination(pyproject)
+        if raw is None or raw.strip() == "":
+            continue
+        return _destination_from_pyproject_value(raw, cwd), "pyproject"
+
+    return _default_global_dest(), "default"
 
 
 def list_skills(bundle: Path) -> list[str]:
@@ -101,7 +207,15 @@ def sync_skills(
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="axiompy-skills",
-        description="Sync bundled AxiomPy Cursor skills to the local filesystem.",
+        description=(
+            "Sync bundled AxiomPy Cursor SKILL.md trees to one resolved directory. "
+            "Does not copy AGENTS.md or .cursorrules."
+        ),
+    )
+    parser.add_argument(
+        "--show-config",
+        action="store_true",
+        help="Print resolved skills parent directory and config source, then exit (no sync).",
     )
     parser.add_argument(
         "--list",
@@ -117,13 +231,13 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--project",
         action="store_true",
-        help="Sync into <cwd>/.cursor/skills/ instead of ~/.cursor/skills/.",
+        help="Sync into <cwd>/.cursor/skills/ (overrides env and pyproject unless --dest).",
     )
     parser.add_argument(
         "--dest",
         type=Path,
         default=None,
-        help="Custom destination directory (overrides --project and default).",
+        help="Custom parent directory for skill folders (highest precedence).",
     )
     parser.add_argument(
         "--force",
@@ -149,6 +263,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     """CLI entry-point for ``axiompy-skills``."""
     parser = _build_parser()
     args = parser.parse_args(argv)
+    cwd = Path.cwd()
 
     if args.version:
         print(f"axiompy {_axiompy_version()}")
@@ -163,15 +278,20 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"  - {s}")
         return 0
 
-    if args.dest is not None:
-        dest = args.dest
-    elif args.project:
-        dest = Path.cwd() / ".cursor" / "skills"
-    else:
-        dest = _default_dest()
+    dest, source = resolve_skills_destination(
+        cwd=cwd,
+        dest=args.dest,
+        project=args.project,
+    )
+
+    if args.show_config:
+        print(f"skills_parent: {dest}")
+        print(f"source: {source}")
+        return 0
 
     print(f"axiompy-skills  (axiompy {_axiompy_version()})")
     print(f"destination: {dest}")
+    print(f"config_source: {source}")
     if args.dry_run:
         print("(dry run — no files will be written)\n")
     else:

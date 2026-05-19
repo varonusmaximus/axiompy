@@ -5,30 +5,17 @@ description: AxiomPy testing standards and patterns. Use when writing tests, tes
 
 # AxiomPy Testing Standards
 
-## Layout
+## Philosophy
 
-- Tests: `tests/test_<module>.py`
-- Framework: **pytest** with fixtures; group related tests in classes
-- Target **80%+** coverage on touched modules (`pyproject.toml` sets `fail_under = 80`)
+**Unit-heavy, boundary-aware:** prove behavior with small tests first; use **integration** where ports touch the outside world and risk is real.
 
-## Patterns
+## When to use this skill
 
-- **Settings:** valid inputs succeed; invalid inputs raise; defaults apply
-- **Factories:** `create()` returns correct implementation per enum/type; `create_mock()` is usable; unknown types raise `ValueError`
-- **Services / I/O:** happy path, boundaries, error paths; use **`unittest.mock.patch`** for external systems
-- **Factories with mocks:** use `create_mock()` and assert call logs where the API records them
+**pytest** layout, **coverage**, **factory mocks**, **unit vs port-boundary integration**, and patching external systems.
 
-```python
-import pytest
-from unittest.mock import patch
+## Normative detail
 
-class TestFeature:
-    @pytest.fixture
-    def service(self):
-        with patch("axiompy.some.module.ClientFactory.create") as m:
-            m.return_value = ...
-            yield build_service()
-```
+See **[axiompy-testing-reference.md](axiompy-testing-reference.md)**.
 
 ## Running tests
 
@@ -36,4 +23,6 @@ class TestFeature:
 pytest tests/ -v --cov=axiompy --cov-report=term-missing
 ```
 
-See **`AGENTS.md`** for project-wide testing expectations.
+## Historical reference
+
+Older expanded examples: **`docs/ARCHIVED_AGENTS.md`** (Testing section).

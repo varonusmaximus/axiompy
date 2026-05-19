@@ -5,58 +5,36 @@ description: AxiomPy design patterns for building classes, services, and modules
 
 # AxiomPy Design Patterns (core)
 
-## Installation
+## Philosophy
 
-Install **`axiompy`** from your team index / PyPI. Optional stacks use extras in **`pyproject.toml`** (`databases`, `storage`, `servers`, `http`, `http-async`, etc.). Sibling wheels **`axiompy-data`** / **`axiompy-agents`** extend the `axiompy.*` namespace when installed.
+- **Simplicity first:** fewer dependencies and clearer boundaries beat clever abstractions.
+- **Ports and adapters:** keep **policy** (rules, public APIs) independent of **I/O mechanisms** (HTTP SDK, DB, secrets backend). See [hexagonal-and-axiompy.md](hexagonal-and-axiompy.md).
+- **Public `axiompy/` + `examples/`** share the **same** architectural bar; keep internals pragmatic only where they are not part of the published surface.
 
-## This repo’s surface
+## When to use this skill
+
+Factories, **Settings** + validation, **explicit DI**, fluent configuration, **errors**, **composition vs inheritance**, **mocks**, **HTTP** and **secrets** construction, and **dispatch** style (`match` / `case`).
+
+## This repo’s surface (entry points)
 
 | Area | Entry points |
 |------|----------------|
 | I/O | `HTTPClientFactory`, database + object storage factories, `JSONRPCClient`, file helpers |
-| Servers | `ServerFactory`, MCP / JSON-RPC integration in `axiompy.servers` |
+| Servers | `ServerFactory`, MCP / JSON-RPC in `axiompy.servers` |
 | Secrets | `SecretsClientFactory`, settings per backend |
 | Cross-cutting | `validators`, `decorators`, `LoggerFactory`, `Result` types |
 
-## 1. Factory (required for multi-backend components)
+## Normative detail (read next)
 
-Use **`match` / `case`** on an **`Enum`**, not `create_for_postgres()`-style helpers. Provide **`create_mock()`** for tests.
+- **[axiompy-patterns.md](axiompy-patterns.md)** — condensed rules (factories, settings, HTTP, secrets, rule of three, layers).
+- **[hexagonal-and-axiompy.md](hexagonal-and-axiompy.md)** — how hexagonal maps to axiompy + external anchors:
+  - [Hexagonal architecture (ports & adapters)](https://devcookies.medium.com/a-detailed-guide-to-hexagonal-architecture-with-examples-042523acb1db)
+  - [A Little Architecture](https://blog.cleancoder.com/uncle-bob/2016/01/04/ALittleArchitecture.html)
 
-Submodules with many adapters (e.g. embedders, stores) should expose a **sub-factory** in their `__init__.py`; a top-level factory composes them.
+## Ecosystem-scale metaphor (optional)
 
-## 2. Explicit configuration
+If you design **data platforms** with autonomous products and pluggable capabilities, read **`docs/data-product-hex-overview.md`** in a source checkout (sanitized overview; no org-specific links).
 
-- **Settings dataclasses** with `__post_init__` calling `axiompy.validators`
-- Pass **Settings** into `Factory.create(...)` — no `create_from_env()` on factories (load env in a separate composition/helper if needed)
+## Installation
 
-## 3. Fluent configuration APIs
-
-Methods like `add_header` / `bearer_token` return **`self`** for chaining.
-
-## 4. Errors, composition, mocks
-
-- Small **exception hierarchies** (base + specific types)
-- **Composition** over inheritance when the type is not a true subtype
-- **Mock** classes beside real implementations; record calls for assertions
-
-## 5. HTTP
-
-Use **`HTTPClientFactory`** for synchronous HTTP. Raw **`requests`** only where documented (streaming, websockets, etc.).
-
-## 6. Dispatch
-
-Prefer **`match` / `case`** for routing on types or discrete string values.
-
-## 7. Utilities
-
-- **Validators:** let them raise; do not wrap/re-raise without adding value
-- **Decorators:** `LogExecutionTime`, `Retry`, `CatchAndLog` from `axiompy.decorators`
-- **Logging:** `LoggerFactory.create_logger(__name__)`
-
-## 8. Secrets
-
-Create clients only via **`SecretsClientFactory.create(type, settings)`** and inject where needed.
-
----
-
-Layered apps, routing tables, caching, and search ports are **application** concerns — when you work on examples or services that use axiompy, follow the same separation rules documented in **`AGENTS.md`** (routes vs services vs domain).
+Install **axiompy** and optional extras from **`pyproject.toml`** (`databases`, `storage`, `servers`, `http`, `http-async`, etc.). Sibling wheels **axiompy-data** / **axiompy-agents** extend the `axiompy.*` namespace when installed.

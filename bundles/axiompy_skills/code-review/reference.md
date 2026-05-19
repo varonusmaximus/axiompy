@@ -1,29 +1,41 @@
-# Code review — compact examples
+# AxiomPy code review reference (normative summary)
 
-Use with **`code-review` SKILL**. For the full rule set, see **`AGENTS.md`**.
+Companion to **`code-review` / SKILL.md**.
 
-## Rule of three
+## Architecture and coupling
 
-Wait for multiple real use cases before introducing an ABC; prefer **`Protocol`** once the abstraction is justified.
+- **Hexagonal / ports-and-adapters:** [Hexagonal architecture (guide)](https://devcookies.medium.com/a-detailed-guide-to-hexagonal-architecture-with-examples-042523acb1db); [Uncle Bob — *A Little Architecture*](https://blog.cleancoder.com/uncle-bob/2016/01/04/ALittleArchitecture.html). Repo overview (sanitized): **`docs/data-product-hex-overview.md`**. AxiomPy mapping: **`design-patterns` / hexagonal-and-axiompy.md`** (bundle) or **`.cursor/skills/design-patterns/hexagonal-and-axiompy.md`**.
+- **Dependency rule:** domain and application **do not** import infrastructure; adapters depend inward. Prefer **composition** and **factories** over deep inheritance trees.
+- **HTTP:** prefer **`axiompy.io.http`**; avoid new raw **`requests`** in library code without justification.
 
-## Single responsibility
+## AxiomPy patterns (factories, settings, errors)
 
-Split services that mix email, reporting, and core domain logic.
+Condensed patterns: **`design-patterns` / axiompy-patterns.md`** (bundle) or **`.cursor/skills/design-patterns/axiompy-patterns.md`**.
 
-## Layered HTTP
+### Checklist (core repo)
 
-Routes validate and delegate; services own rules; repositories own persistence. No `db.session` in route functions.
+- [ ] Factories: `create` + `create_mock`; **enum**-based dispatch where multiple backends exist
+- [ ] **Settings** dataclass with `__post_init__` validation (`axiompy.validators`)
+- [ ] **Typed** public APIs; Google-style docstrings for public surface
+- [ ] **Logging** via `LoggerFactory` where appropriate
+- [ ] **Secrets:** `SecretsClientFactory` — no ad hoc env reads scattered in library code
+- [ ] **REST / HTTP APIs** (when applicable): resource-oriented paths; soft delete via `DELETE`; avoid verb-shaped URLs — align with **`AGENTS.md`**
+- [ ] No Mermaid blocks in long-lived markdown docs (use images)
+- [ ] **README co-update:** every touched `axiompy/<area>/`, `examples/<name>/`, or workflow has matching `README.md` updates (install extras, breaking API, CI) — see **documentation** skill
 
-## Dependency inversion
+## Security and reliability
 
-Inject `Database` / `Emailer` ports; construct with factories at the composition root.
+- **No secrets** in source; use **`axiompy.secrets`** or env — never commit keys/passwords.
+- **Validate** inputs at boundaries (`axiompy.validators`); **log** via **`LoggerFactory`**; avoid bare `except` and silent failure.
 
-## Smells (examples)
+## Review triage (simplicity-first)
 
-- Replace magic `429` / `60` with named constants for backoff.
-- Replace duplicated validation blocks with a shared helper.
-- Replace bare `except:` with specific exceptions and logging.
+1. **Correctness and invariants** — wrong behavior beats style.
+2. **Coupling and boundaries** — domain vs adapters; hidden globals; **YAGNI** / speculative layers.
+3. **Testability** — can behavior be proven with **units**; is integration only at **ports**?
+4. **Security and observability** — secrets, validation, logging, error paths.
+5. **Style nits** — last; defer to **`code-style`** unless they block readability.
 
-## Security
+## Historical reference
 
-Never commit credentials; use env vars or `SecretsClientFactory` patterns from **`axiompy.secrets`**.
+Older expanded narrative: **`docs/ARCHIVED_AGENTS.md`** (for archaeology only).
