@@ -18,6 +18,7 @@ EXPECTED_SKILLS = [
     "code-style",
     "design-patterns",
     "documentation",
+    "ship-it",
     "testing",
 ]
 
