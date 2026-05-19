@@ -5,7 +5,7 @@ description: >-
   commits and pushes when there are changes. Use for /ship-it, ship it, run
   automation, ci-local, commit and push, merge ready, green CI, or pre-push
   checks. AxiomPy repo only; never commits on main; does not push when the
-  working tree is clean after checks.
+  working tree is clean after checks. Ends with a copy-paste PR Summary in chat.
 ---
 
 # Ship it (`/ship-it`)
@@ -22,7 +22,8 @@ End-to-end **local CI → commit → push** for the **axiompy** repository only.
 6. **Git status** — If the working tree is **clean** (no staged/unstaged changes after CI): **stop. Do not push.** Report success and any unpushed commits only if the user asks.
 7. **Untracked files** — If there are **untracked** files, **ask the user** which paths to include before `git add`. Do not stage all untracked files by default.
 8. **Commit** — Stage only agreed paths plus other modified files the user confirmed. Draft a 1–2 sentence commit message from the diff (repo style). Commit (hooks may run; use full permissions if needed).
-9. **Push** — `git push -u origin HEAD`.
+9. **Push** — `git push -u origin HEAD` (when a new commit was created).
+10. **PR Summary** — After CI passes, emit a **markdown PR body in the chat** the user can copy into `gh pr create` or the GitHub UI. See [reference.md](reference.md#pr-summary-in-chat). Always do this step when the branch has commits ahead of `main` (or when a commit was pushed this run).
 
 ## Rules
 
@@ -34,6 +35,7 @@ End-to-end **local CI → commit → push** for the **axiompy** repository only.
 | Untracked | **Ask** before staging |
 | Retries | Max **5** `make ci-local` runs |
 | Push | `git push -u origin HEAD` when a new commit was created |
+| PR Summary | Markdown in **chat only** (not a repo file); copy-paste for opening a PR |
 | Secrets | Never commit `.env`, keys, or credentials |
 
 ## Normative detail
