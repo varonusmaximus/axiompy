@@ -55,7 +55,7 @@ Top of each module: purpose, main capabilities, pointers to area **`README.md`**
 2. For each, confirm the matching `README.md` reflects new install extras, breaking changes, and public API names.
 3. If you add or remove a `[project.optional-dependencies]` extra, update root README and any module README that listed the old extra name (e.g. do not document removed `[fastapi]` — use `[servers]`).
 
-**Bundled copy:** keep [`.cursor/skills/documentation/SKILL.md`](../../../.cursor/skills/documentation/SKILL.md) and [`bundles/axiompy_skills/documentation/SKILL.md`](SKILL.md) in sync when editing skills in-repo (or run `axiompy-skills --project` after editing the bundle).
+**Bundled copy:** keep `.cursor/skills/documentation/` and `bundles/axiompy_skills/documentation/` in sync when editing skills in-repo (or run `axiompy-skills --project` after editing the bundle).
 
 ## Diagrams and figures
 
