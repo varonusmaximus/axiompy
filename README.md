@@ -16,8 +16,10 @@ Python package [`axiompy`](axiompy/):
 | JSON-RPC | [`axiompy/io/jsonrpc.py`](axiompy/io/jsonrpc.py) | Client + batch | [I/O README](axiompy/io/README.md) |
 | Servers | [`axiompy/servers/`](axiompy/servers/) | `ServerFactory`, MCP, JSON-RPC | [Servers README](axiompy/servers/README.md) |
 | Secrets | [`axiompy/secrets/`](axiompy/secrets/) | Factory + AWS (Secrets Manager, KMS), local `.env` | [Secrets README](axiompy/secrets/README.md) |
-| Cross-cutting | [`axiompy/validators.py`](axiompy/validators.py), [`axiompy/decorators.py`](axiompy/decorators.py), [`axiompy/loggers.py`](axiompy/loggers.py), [`axiompy/result.py`](axiompy/result.py), [`axiompy/web.py`](axiompy/web.py) | | [Package hub](axiompy/README.md) |
+| Cross-cutting | [`axiompy/validators.py`](axiompy/validators.py), [`axiompy/decorators.py`](axiompy/decorators.py), [`axiompy/loggers.py`](axiompy/loggers.py), [`axiompy/result.py`](axiompy/result.py), [`axiompy/web.py`](axiompy/web.py) (`HttpResponseError`; FastAPI bridge in [`axiompy/servers`](axiompy/servers/)) | | [Package hub](axiompy/README.md) |
 | Cursor skills CLI | [`axiompy/cli/cursor_skills.py`](axiompy/cli/cursor_skills.py) | Installs bundled **SKILL.md trees** to one resolved directory (see below) | [CLI README](axiompy/cli/README.md) |
+
+**Not in this repo:** `axiompy.data` and `axiompy.agents` / `axiompy.reasoning` ship in sibling distributions (**axiompy-data**, **axiompy-agents**) with the same import namespace when those wheels are installed.
 
 ## Installation
 
@@ -25,10 +27,17 @@ Python package [`axiompy`](axiompy/):
 pip install axiompy
 ```
 
+Base install includes **Pydantic** and framework-agnostic helpers (`axiompy.web`, `axiompy.result`, validators, logging). FastAPI and Flask are optional via **`[servers]`**.
+
 Optional stacks use [extras in `pyproject.toml`](pyproject.toml) (see `[project.optional-dependencies]`):
 
 ```bash
-pip install "axiompy[dev,servers,databases,storage,http,http-async]"
+pip install "axiompy[io]"        # HTTP, databases, object storage, YAML
+pip install "axiompy[servers]"   # Flask, FastAPI, uvicorn, httpx
+pip install "axiompy[dev,io,servers]"
+pip install "axiompy[data]"      # pulls axiompy-data from your index
+pip install "axiompy[agents]"    # pulls axiompy-agents from your index
+pip install "axiompy[all]"       # io + servers + data + agents wheels
 ```
 
 ### Install for Cursor agents (library + skills)
@@ -71,7 +80,7 @@ Requires **Python 3.12+**. On macOS, run **`brew install python@3.12`** once; `m
 
 ```bash
 pip install -r requirements-dev.txt
-pip install -e ".[dev,servers,databases,storage,http,http-async]"
+pip install -e ".[dev,io,servers]"
 make test
 make lint
 ```

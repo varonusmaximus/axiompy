@@ -25,7 +25,7 @@ In the **axiompy** core repository, agents should navigate **README links** in t
 
 ## Normative detail
 
-See **[axiompy-documentation-reference.md](axiompy-documentation-reference.md)** (README layout rules, diagram / Mermaid policy, REST-in-docs rules).
+See **[axiompy-documentation-reference.md](axiompy-documentation-reference.md)** (README layout rules, diagram / Mermaid policy, REST-in-docs rules, README co-update table).
 
 ## Historical reference
 

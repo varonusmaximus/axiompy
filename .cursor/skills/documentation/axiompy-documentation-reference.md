@@ -34,6 +34,28 @@ Top of each module: purpose, main capabilities, pointers to area **`README.md`**
 ### Examples
 
 - Subfolders under **`examples/`** may include a **README** for local demos. They are optional and not part of the core **`axiompy`** API unless code imports from **`axiompy.*`** only.
+- **Example READMEs** (`examples/<name>/README.md`): how to run the example, dependencies/extras, and patterns demonstrated — kept in sync with example code.
+
+### README co-update (required)
+
+**Whenever you change code, packaging, or CI in an area, update the README(s) for that area in the same PR.** Do not merge behavior or install changes without matching documentation.
+
+| If you change… | Update… |
+|----------------|---------|
+| `pyproject.toml` extras, core `dependencies`, or root install | `README.md` (repository root) |
+| `axiompy/<area>/` (API, errors, install needs) | `axiompy/<area>/README.md` |
+| `examples/<name>/` | `examples/<name>/README.md` |
+| `.github/workflows/*.yml` | `.github/workflows/README.md` |
+| `axiompy/web.py` or HTTP error types | root README + any example/server README that shows `ResultErrorHandler` or FastAPI/Flask routes |
+| `axiompy/servers/` (factory, bridges, server types) | `axiompy/servers/README.md` + affected `examples/*/README.md` |
+
+**Checklist before opening a PR:**
+
+1. List directories touched under `axiompy/`, `examples/`, or `.github/workflows/`.
+2. For each, confirm the matching `README.md` reflects new install extras, breaking changes, and public API names.
+3. If you add or remove a `[project.optional-dependencies]` extra, update root README and any module README that listed the old extra name (e.g. do not document removed `[fastapi]` — use `[servers]`).
+
+**Bundled copy:** keep [`SKILL.md`](SKILL.md) and [`bundles/axiompy_skills/documentation/SKILL.md`](../../../bundles/axiompy_skills/documentation/SKILL.md) in sync when editing skills in-repo (or run `axiompy-skills --project` after editing the bundle).
 
 ## Diagrams and figures
 

@@ -19,6 +19,7 @@ from axiompy.result import (
 )
 from axiompy.web import (
     AdapterPattern,
+    HttpResponseError,
     PaginationHelper,
     ResultConverter,
     ResultErrorHandler,
@@ -35,6 +36,7 @@ __all__ = [
     "collect_results",
     "partition_results",
     "try_catch",
+    "HttpResponseError",
     "ResultValidator",
     "ResultConverter",
     "ResultErrorHandler",

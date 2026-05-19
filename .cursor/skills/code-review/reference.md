@@ -10,7 +10,18 @@ Companion to **`code-review` / SKILL.md**.
 
 ## AxiomPy patterns (factories, settings, errors)
 
-Condensed checklist: **`design-patterns` / axiompy-patterns.md`** (bundle) or **`.cursor/skills/design-patterns/axiompy-patterns.md`**.
+Condensed patterns: **`design-patterns` / axiompy-patterns.md`** (bundle) or **`.cursor/skills/design-patterns/axiompy-patterns.md`**.
+
+### Checklist (core repo)
+
+- [ ] Factories: `create` + `create_mock`; **enum**-based dispatch where multiple backends exist
+- [ ] **Settings** dataclass with `__post_init__` validation (`axiompy.validators`)
+- [ ] **Typed** public APIs; Google-style docstrings for public surface
+- [ ] **Logging** via `LoggerFactory` where appropriate
+- [ ] **Secrets:** `SecretsClientFactory` — no ad hoc env reads scattered in library code
+- [ ] **REST / HTTP APIs** (when applicable): resource-oriented paths; soft delete via `DELETE`; avoid verb-shaped URLs — align with **`AGENTS.md`**
+- [ ] No Mermaid blocks in long-lived markdown docs (use images)
+- [ ] **README co-update:** every touched `axiompy/<area>/`, `examples/<name>/`, or workflow has matching `README.md` updates (install extras, breaking API, CI) — see **documentation** skill
 
 ## Security and reliability
 

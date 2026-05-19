@@ -14,6 +14,14 @@ The `secrets` module provides a unified, extensible interface for managing secre
 - 💾 **Caching**: Built-in credential caching with expiration checking
 - 📝 **Well-Documented**: Comprehensive docstrings and examples
 
+## Installation
+
+```bash
+pip install axiompy
+```
+
+Optional AWS backends need `boto3` / `moto` (see root `README.md` and `pyproject.toml` extras). Examples that combine secrets with **FastAPI** also need `pip install "axiompy[servers]"`.
+
 ## Quick Start
 
 ### Basic Usage
