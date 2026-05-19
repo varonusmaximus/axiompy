@@ -1046,8 +1046,7 @@ class SQLSyntaxValidator:
 
     def validate(self, context: ValidationContext) -> ValidationContext:
         """Validate SQL syntax and add errors/warnings to context."""
-        # pylint: disable=import-outside-toplevel
-        from axiompy.reasoning.validators import SQLValidator
+        from axiompy.sql_engine import SQLValidator
 
         result = SQLValidator.validate_syntax(context.sql, self.use_parser)
         context.errors.extend(result.errors)
@@ -1086,8 +1085,7 @@ class SQLColumnValidator:
         if not context.metadata:
             return context
 
-        # pylint: disable=import-outside-toplevel
-        from axiompy.reasoning.validators import SQLValidator
+        from axiompy.sql_engine import SQLValidator
 
         # Extract schema columns from metadata
         schema_columns = set()
@@ -1142,8 +1140,7 @@ class SQLDatabaseValidator:
             # No connection provided, skip validation
             return context
 
-        # pylint: disable=import-outside-toplevel
-        from axiompy.reasoning.validators import SQLValidator
+        from axiompy.sql_engine import SQLValidator
 
         result = SQLValidator.validate_with_db_dryrun(
             context.sql, context.db_connection, self.dialect
