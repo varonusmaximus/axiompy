@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import fnmatch
+import re
 from pathlib import Path
 
 from axiompy.aal.config import cursor_config_dir, load_config
@@ -10,6 +10,42 @@ from axiompy.aal.constants import BOOTSTRAP_FILE, COMMENT_STYLES
 from axiompy.aal.domains import list_domain_names
 from axiompy.aal.parser import parse_aal_file
 from axiompy.aal.scanner import iter_source_files, read_file_for_parse
+
+
+def _glob_to_regex(pattern: str) -> str:
+    """Translate a repo-relative glob (with ``**``) into a full-match regex."""
+    parts: list[str] = ["^"]
+    index = 0
+    while index < len(pattern):
+        if pattern[index : index + 3] == "**/":
+            parts.append("(?:.*/)?")
+            index += 3
+            continue
+        if pattern[index : index + 2] == "**":
+            parts.append(".*")
+            index += 2
+            continue
+        char = pattern[index]
+        if char == "*":
+            parts.append("[^/]*")
+            index += 1
+            continue
+        if char == "?":
+            parts.append("[^/]")
+            index += 1
+            continue
+        end = index
+        while end < len(pattern) and pattern[end] not in {"*", "?"}:
+            end += 1
+        parts.append(re.escape(pattern[index:end]))
+        index = end
+    parts.append("$")
+    return "".join(parts)
+
+
+def _path_matches_glob(rel_path: str, pattern: str) -> bool:
+    """Match repo-relative paths using glob semantics (supports ``**``)."""
+    return re.fullmatch(_glob_to_regex(pattern), rel_path) is not None
 
 
 def _load_bootstrap(root: Path) -> dict:
@@ -28,7 +64,7 @@ def _match_hint(rel_path: str, hints: list[dict]) -> dict | None:
     best: tuple[int, dict] | None = None
     for hint in hints:
         glob = hint.get("glob", "")
-        if fnmatch.fnmatch(rel_path, glob):
+        if _path_matches_glob(rel_path, glob):
             score = len(glob)
             if best is None or score > best[0]:
                 best = (score, hint)
@@ -64,7 +100,7 @@ def suggest_annotations(root: Path) -> list[dict]:
     suggestions: list[dict] = []
     for path in iter_source_files(root, config):
         rel = str(path.relative_to(root))
-        if not any(fnmatch.fnmatch(rel, g) for g in p0_globs):
+        if not any(_path_matches_glob(rel, g) for g in p0_globs):
             continue
 
         ext, content = read_file_for_parse(path, config)
@@ -107,12 +143,14 @@ def cmd_bootstrap_suggest(root: Path) -> int:
 
 
 def comment_prefix(ext: str) -> str:
-    if ext == ".sql":
-        return "--"
-    singles = COMMENT_STYLES.get(ext, (["#"], None))[0]
-    if ext in (".ts", ".js", ".go", ".java", ".rs", ".vue", ".cpp"):
-        return "//"
-    return singles[0] if singles else "#"
+    match ext:
+        case ".sql":
+            return "--"
+        case ".ts" | ".js" | ".go" | ".java" | ".rs" | ".vue" | ".cpp":
+            return "//"
+        case _:
+            singles = COMMENT_STYLES.get(ext, (["#"], None))[0]
+            return singles[0] if singles else "#"
 
 
 def cmd_bootstrap_apply(root: Path, *, level: str, dry_run: bool = True) -> int:

@@ -12,6 +12,7 @@ import pytest
 from axiompy.aal.bootstrap import (
     _domains_from_hint,
     _match_hint,
+    _path_matches_glob,
     _warn_incompatible,
     cmd_annotate,
     cmd_bootstrap_apply,
@@ -27,6 +28,12 @@ _CURSOR_DIR = "_aal_cursor"
 @pytest.fixture(autouse=True)
 def _aal_cursor_dir(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("AXIOMPY_AAL_CURSOR_DIR", _CURSOR_DIR)
+
+
+def test_path_matches_glob_supports_double_star():
+    assert _path_matches_glob("axiompy/aal/domains.py", "axiompy/**")
+    assert _path_matches_glob("tests/test_aal.py", "tests/**")
+    assert not _path_matches_glob("docs/aal/spec.md", "axiompy/**")
 
 
 def test_match_hint_prefers_longest_glob():
