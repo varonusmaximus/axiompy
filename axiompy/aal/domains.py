@@ -4,11 +4,44 @@
 
 from __future__ import annotations
 
+from enum import Enum, auto
 from pathlib import Path
 from typing import Any
 
 from axiompy.aal.bundle import load_manifest
 from axiompy.aal.constants import DOMAINS_FILE, cursor_config_dir_name
+
+
+class _DomainsYamlLineKind(Enum):
+    SKIP = auto()
+    DOMAIN_HEADER = auto()
+    SKILLS_HEADER = auto()
+    SKILL_ITEM = auto()
+
+
+def _classify_domains_yaml_line(
+    line: str,
+    *,
+    current: str | None,
+    in_skills: bool,
+) -> _DomainsYamlLineKind:
+    match (line, current, in_skills):
+        case ("", _, _) | (_, _, _) if line.startswith("#"):
+            return _DomainsYamlLineKind.SKIP
+        case ("domains:", _, _):
+            return _DomainsYamlLineKind.SKIP
+        case (domain_line, _, _) if (
+            domain_line.endswith(":")
+            and not domain_line.startswith("-")
+            and "skills" not in domain_line
+        ):
+            return _DomainsYamlLineKind.DOMAIN_HEADER
+        case ("skills:", name, _) if name is not None:
+            return _DomainsYamlLineKind.SKILLS_HEADER
+        case (item, name, True) if item.startswith("- ") and name is not None:
+            return _DomainsYamlLineKind.SKILL_ITEM
+        case _:
+            return _DomainsYamlLineKind.SKIP
 
 
 def _parse_domains_yaml(text: str) -> dict[str, dict[str, Any]]:
@@ -17,20 +50,17 @@ def _parse_domains_yaml(text: str) -> dict[str, dict[str, Any]]:
     in_skills = False
     for raw in text.splitlines():
         line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        if line == "domains:":
-            continue
-        if line.endswith(":") and not line.startswith("-") and "skills" not in line:
-            current = line[:-1]
-            domains[current] = {"skills": []}
-            in_skills = False
-            continue
-        if current and line == "skills:":
-            in_skills = True
-            continue
-        if in_skills and line.startswith("- "):
-            domains[current]["skills"].append(line[2:].strip().strip("\"'"))
+        match _classify_domains_yaml_line(line, current=current, in_skills=in_skills):
+            case _DomainsYamlLineKind.SKIP:
+                continue
+            case _DomainsYamlLineKind.DOMAIN_HEADER:
+                current = line[:-1]
+                domains[current] = {"skills": []}
+                in_skills = False
+            case _DomainsYamlLineKind.SKILLS_HEADER:
+                in_skills = True
+            case _DomainsYamlLineKind.SKILL_ITEM:
+                domains[current]["skills"].append(line[2:].strip().strip("\"'"))
     return domains
 
 
@@ -69,20 +99,24 @@ def domain_skill_paths(root: Path, domain: str) -> list[str]:
     entry = domains.get(domain)
     if not entry:
         return []
-    skills = entry.get("skills")
-    if skills:
-        return list(skills)
-    uri = entry.get("uri")
-    return [uri] if uri else []
+    match entry:
+        case {"skills": skills} if skills:
+            return list(skills)
+        case {"uri": uri} if uri:
+            return [uri]
+        case _:
+            return []
 
 
 def resolve_read_target(root: Path, target: str) -> list[str]:
     """Resolve guard read target: domain name or explicit skill path."""
-    if target.startswith(".cursor/"):
-        return [target]
-    if "/" in target and target.endswith(".md"):
-        return [target if target.startswith(".") else f".cursor/skills/{target}"]
-    return domain_skill_paths(root, target.split("/")[0])
+    match target:
+        case t if t.startswith(".cursor/"):
+            return [t]
+        case t if "/" in t and t.endswith(".md"):
+            return [t if t.startswith(".") else f".cursor/skills/{t}"]
+        case _:
+            return domain_skill_paths(root, target.split("/")[0])
 
 
 def list_domain_names(root: Path) -> list[str]:

@@ -7,7 +7,6 @@ from pathlib import Path
 
 from axiompy.aal.config import load_config
 from axiompy.aal.domains import domain_skill_paths, load_domains
-from axiompy.aal.middleware import EditIntent, aal_pre_edit_hook
 from axiompy.aal.parser import effective_annotation_at_line, parse_aal_file
 from axiompy.aal.scanner import read_file_for_parse
 

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from axiompy.aal.install import InstallOptions, cmd_install
+from axiompy.aal.install import InstallOptions, cmd_install, cmd_upgrade
 
 _CURSOR_DIR = "_aal_cursor"
 
@@ -47,3 +47,9 @@ def test_install_hooks_writes_registry(tmp_path: Path):
     assert (_cursor(root) / "bootstrap.yaml").is_file()
     assert (skills_dest / "testing" / "SKILL.md").is_file()
     assert (_cursor(root) / "hooks/aal-inject.sh").is_file()
+
+
+def test_upgrade_requires_manifest(tmp_path: Path, capsys):
+    root = tmp_path
+    assert cmd_upgrade(root) == 1
+    assert "missing" in capsys.readouterr().out.lower()
