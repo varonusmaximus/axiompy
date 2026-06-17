@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 Decorator utilities for logging, error handling, and tracing
 """

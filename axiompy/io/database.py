@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 Database abstraction layer with support for multiple database backends.
 

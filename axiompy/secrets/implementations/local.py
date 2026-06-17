@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 Local .env file secrets backend for development.
 

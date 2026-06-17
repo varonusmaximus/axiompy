@@ -1,3 +1,5 @@
+# @!code-style
+
 """Allow ``python -m axiompy.cli.cursor_skills`` as an alias for ``axiompy-skills``."""
 
 from __future__ import annotations

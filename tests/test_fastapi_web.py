@@ -1,3 +1,5 @@
+# @!testing
+
 """Tests for FastAPI bridge helpers in axiompy.servers.fastapi_web."""
 
 import pytest

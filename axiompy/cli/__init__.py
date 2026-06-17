@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 AxiomPy CLI entry-points.
 

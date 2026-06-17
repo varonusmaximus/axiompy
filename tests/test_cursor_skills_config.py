@@ -1,3 +1,5 @@
+# @!testing
+
 """Tests for axiompy-skills destination resolution and --show-config."""
 
 from __future__ import annotations

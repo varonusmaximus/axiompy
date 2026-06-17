@@ -1,3 +1,5 @@
+# @!testing
+
 """
 Pytest configuration and fixtures for axiompy tests.
 

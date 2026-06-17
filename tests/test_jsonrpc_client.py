@@ -1,3 +1,5 @@
+# @!testing
+
 """
 Comprehensive tests for JSON-RPC Client.
 

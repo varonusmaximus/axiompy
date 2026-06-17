@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 Secrets and credential management module for axiompy.
 

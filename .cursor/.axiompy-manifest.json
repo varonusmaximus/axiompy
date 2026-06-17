@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "axiompy_version": "1.3.0",
+  "managed_paths": [
+    ".cursor/domains.yaml",
+    ".cursor/aal.yaml",
+    ".cursor/bootstrap.yaml",
+    ".cursor/hooks.json",
+    ".cursor/hooks/aal-inject.sh",
+    ".cursor/rules/aal.mdc",
+    ".github/workflows/axiompy-aal-gate.yml"
+  ],
+  "skills": [
+    "code-review",
+    "code-style",
+    "design-patterns",
+    "documentation",
+    "ship-it",
+    "testing"
+  ]
+}

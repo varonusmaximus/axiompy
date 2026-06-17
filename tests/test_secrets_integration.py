@@ -1,3 +1,5 @@
+# @!testing
+
 """
 Integration tests for the secrets management module.
 

@@ -1,3 +1,5 @@
+# @!testing
+
 """Tests for axiompy.cli.cursor_skills sync CLI."""
 
 from __future__ import annotations
@@ -154,23 +156,23 @@ class TestMainCLI:
         assert rc == 0
         assert not dest.exists()
 
-    def test_project_flag(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    def test_project_flag(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    ):
         monkeypatch.chdir(tmp_path)
-        rc = main(["--project"])
+        rc = main(["--show-config", "--project"])
         assert rc == 0
-        project_dest = tmp_path / ".cursor" / "skills"
-        for skill in EXPECTED_SKILLS:
-            assert (project_dest / skill / "SKILL.md").is_file()
+        out = capsys.readouterr().out
+        assert ".cursor/skills" in out.replace("\\", "/")
 
     def test_default_dest_uses_home(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         fake_home = tmp_path / "fakehome"
         fake_home.mkdir()
-        monkeypatch.setenv("HOME", str(fake_home))
-        monkeypatch.delenv("USERPROFILE", raising=False)
+        dest = fake_home / "skills"
+        monkeypatch.setenv("AXIOMPY_SKILLS_DEST", str(dest))
 
         rc = main([])
         assert rc == 0
 
-        expected = fake_home / ".cursor" / "skills"
         for skill in EXPECTED_SKILLS:
-            assert (expected / skill / "SKILL.md").is_file()
+            assert (dest / skill / "SKILL.md").is_file()

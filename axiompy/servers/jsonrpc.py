@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 JSON-RPC 2.0 Server implementation with multiple transport support.
 

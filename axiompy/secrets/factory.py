@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 Factory for creating secret clients.
 

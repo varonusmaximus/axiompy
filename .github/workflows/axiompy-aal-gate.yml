@@ -1,0 +1,28 @@
+name: AxiomPy AAL Constraint Gate
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify-aal-domains:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install axiompy
+        run: pip install -e ".[dev]"
+
+      - name: AAL doctor (strict)
+        run: axiompy-skills doctor --strict
+
+      - name: AAL verify-domains (strict)
+        run: axiompy-skills verify-domains --strict

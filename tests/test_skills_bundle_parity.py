@@ -1,3 +1,5 @@
+# @!testing
+
 """Ensure authoring (.cursor/skills) matches the shipped bundle (bundles/axiompy_skills)."""
 
 from __future__ import annotations

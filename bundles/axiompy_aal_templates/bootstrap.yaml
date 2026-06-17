@@ -1,0 +1,21 @@
+p0_globs:
+  - "axiompy/**"
+  - "tests/**"
+  - "bundles/**"
+
+default_domain: code-style
+max_domains_per_annotation: 3
+warn_if_domains_count_gt: 1
+
+path_hints:
+  - glob: "tests/**"
+    domain: testing
+  - glob: "axiompy/cli/**"
+    domain: code-style
+  - glob: "axiompy/aal/**"
+    domains: [code-style, testing]
+  - glob: "bundles/**"
+    domain: documentation
+
+incompatible_pairs:
+  - [code-review, testing]

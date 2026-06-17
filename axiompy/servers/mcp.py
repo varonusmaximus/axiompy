@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 MCP (Model Context Protocol) Server abstraction layer with support for multiple AI agent frameworks.
 

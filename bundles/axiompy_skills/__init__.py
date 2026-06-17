@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Bundled Cursor skills shipped with axiompy.
 

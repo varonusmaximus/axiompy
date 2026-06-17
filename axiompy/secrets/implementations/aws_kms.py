@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 AWS KMS (Key Management Service) secret client implementation.
 

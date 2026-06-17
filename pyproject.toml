@@ -13,10 +13,12 @@ keywords = ["utilities", "logging", "validation", "decorators", "http", "databas
 packages = [
     { include = "axiompy" },
     { include = "axiompy_skills", from = "bundles" },
+    { include = "axiompy_aal_templates", from = "bundles" },
 ]
 include = [
     { path = "bundles/axiompy_skills/**/*.md", format = ["sdist", "wheel"] },
     { path = "bundles/axiompy_skills/**/*.json", format = ["sdist", "wheel"] },
+    { path = "bundles/axiompy_aal_templates/**/*", format = ["sdist", "wheel"] },
 ]
 
 [tool.poetry.dependencies]

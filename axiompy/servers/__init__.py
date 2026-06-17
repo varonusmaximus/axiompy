@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 Web server abstractions for Flask and FastAPI, MCP server abstractions for AI agent frameworks,
 and JSON-RPC 2.0 server implementations.

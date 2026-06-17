@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 Abstract secret client interface for unified secret management.
 

@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 Logger Factory Module
 

@@ -1,3 +1,5 @@
+# @!testing
+
 """
 Tests for MCPToolService - service layer for exposing MCP tools via HTTP.
 

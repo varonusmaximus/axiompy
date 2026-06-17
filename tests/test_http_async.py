@@ -1,3 +1,5 @@
+# @!testing
+
 """Tests for async HTTP batch client (axiompy.io.http_async)."""
 
 from __future__ import annotations

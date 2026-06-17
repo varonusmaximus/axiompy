@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 AWS Secrets Manager secret client implementation.
 

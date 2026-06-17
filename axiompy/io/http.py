@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 HTTP client utilities with retry logic, auth support, and flexible serialization.
 

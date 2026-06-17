@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 AxiomPy - Core Python utilities
 """

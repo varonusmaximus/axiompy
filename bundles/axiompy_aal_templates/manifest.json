@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "domains": {
+    "code-review": {
+      "skills": [".cursor/skills/code-review/SKILL.md"]
+    },
+    "code-style": {
+      "skills": [".cursor/skills/code-style/SKILL.md"]
+    },
+    "design-patterns": {
+      "skills": [".cursor/skills/design-patterns/SKILL.md"]
+    },
+    "documentation": {
+      "skills": [".cursor/skills/documentation/SKILL.md"]
+    },
+    "ship-it": {
+      "skills": [".cursor/skills/ship-it/SKILL.md"]
+    },
+    "testing": {
+      "skills": [".cursor/skills/testing/SKILL.md"]
+    }
+  },
+  "managed_paths": [
+    ".cursor/domains.yaml",
+    ".cursor/aal.yaml",
+    ".cursor/bootstrap.yaml",
+    ".cursor/hooks.json",
+    ".cursor/hooks/aal-inject.sh",
+    ".cursor/rules/aal.mdc",
+    ".github/workflows/axiompy-aal-gate.yml"
+  ]
+}

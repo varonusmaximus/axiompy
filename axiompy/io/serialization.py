@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 Serialization and deserialization utilities for HTTP clients.
 

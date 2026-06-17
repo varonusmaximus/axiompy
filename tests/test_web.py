@@ -1,3 +1,5 @@
+# @!testing
+
 """
 Comprehensive tests for axiompy.web module.
 

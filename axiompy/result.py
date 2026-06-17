@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 Railway-Oriented Programming Result Type for axiompy.
 

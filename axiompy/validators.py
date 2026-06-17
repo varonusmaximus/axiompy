@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 Validation module providing flexible assertion-like validators with default and
 custom error messages.

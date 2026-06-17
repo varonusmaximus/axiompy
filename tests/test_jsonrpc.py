@@ -1,3 +1,5 @@
+# @!testing
+
 """
 Comprehensive tests for JSON-RPC 2.0 server implementation.
 

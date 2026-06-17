@@ -1,3 +1,5 @@
+# @!testing
+
 """
 Tests for the database abstraction layer.
 

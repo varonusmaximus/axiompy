@@ -1,9 +1,10 @@
-"""
-Sync bundled Cursor skills to the local filesystem.
+# @!code-style
 
-Copies only **SKILL.md trees** from the ``axiompy_skills`` package into a **single**
-resolved parent directory (e.g. ``~/.cursor/skills``). Does not install ``AGENTS.md``,
-``.cursorrules``, or other repo guidance.
+"""
+Sync bundled Cursor skills and AAL tooling to the local filesystem.
+
+Copies **SKILL.md trees** from ``axiompy_skills`` and optionally installs AAL
+registry, hooks, and CI templates via ``install --project --hooks``.
 
 Destination precedence (highest first):
 
@@ -16,13 +17,13 @@ Destination precedence (highest first):
 
 Usage::
 
-    axiompy-skills --show-config   # print resolved destination and exit
-    axiompy-skills                # sync (uses resolved destination)
-    axiompy-skills --list         # list bundled skills
-    axiompy-skills --dry-run      # preview without writing
-    axiompy-skills --project      # force <cwd>/.cursor/skills/
-    axiompy-skills --dest /tmp/x  # force custom parent directory
-    python -m axiompy.cli.cursor_skills   # same as axiompy-skills
+    axiompy-skills --show-config
+    axiompy-skills --project
+    axiompy-skills install --project --hooks
+    axiompy-skills verify-domains --strict
+    axiompy-skills resolve --file PATH --line N --json
+    axiompy-skills bootstrap suggest
+    axiompy-skills doctor --strict
 """
 
 from __future__ import annotations
@@ -39,7 +40,7 @@ from typing import Iterator, Sequence
 _BUNDLE_PACKAGE = "axiompy_skills"
 
 
-def _bundle_root() -> Path:
+def skills_bundle_root() -> Path:
     """Return the on-disk path of the bundled skills package."""
     ref = importlib.resources.files(_BUNDLE_PACKAGE)
     bundle_path = Path(str(ref))
@@ -49,8 +50,12 @@ def _bundle_root() -> Path:
     return bundle_path
 
 
+def _bundle_root() -> Path:
+    """Alias for tests and backward compatibility."""
+    return skills_bundle_root()
+
+
 def _default_global_dest() -> Path:
-    """``~/.cursor/skills``."""
     return Path.home() / ".cursor" / "skills"
 
 
@@ -64,7 +69,6 @@ def _axiompy_version() -> str:
 
 
 def _iter_directories_for_pyproject(start: Path) -> Iterator[Path]:
-    """Yield start, then parents, until filesystem root."""
     cur = start.resolve()
     while True:
         yield cur
@@ -75,7 +79,6 @@ def _iter_directories_for_pyproject(start: Path) -> Iterator[Path]:
 
 
 def _read_tool_axiompy_skills_destination(pyproject_path: Path) -> str | None:
-    """Return ``destination`` string from ``[tool.axiompy.skills]`` or None."""
     try:
         data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, tomllib.TOMLDecodeError):
@@ -94,7 +97,6 @@ def _read_tool_axiompy_skills_destination(pyproject_path: Path) -> str | None:
 
 
 def _destination_from_pyproject_value(raw: str, cwd: Path) -> Path:
-    """Map ``global`` / ``project`` / path string to a concrete directory."""
     key = raw.strip()
     match key:
         case "global":
@@ -114,21 +116,6 @@ def resolve_skills_destination(
     dest: Path | None,
     project: bool,
 ) -> tuple[Path, str]:
-    """
-    Resolve the single parent directory for synced skill folders.
-
-    Precedence: ``--dest`` > ``--project`` > ``AXIOMPY_SKILLS_DEST`` >
-    ``[tool.axiompy.skills].destination`` (nearest pyproject.toml upward) >
-    default global directory.
-
-    Args:
-        cwd: Current working directory for ``project`` and relative paths.
-        dest: ``--dest`` value if provided.
-        project: Whether ``--project`` was passed.
-
-    Returns:
-        Tuple of (resolved parent path, source label for diagnostics).
-    """
     if dest is not None:
         p = dest.expanduser()
         if not p.is_absolute():
@@ -157,7 +144,6 @@ def resolve_skills_destination(
 
 
 def list_skills(bundle: Path) -> list[str]:
-    """Return sorted skill directory names found in the bundle."""
     return sorted(p.name for p in bundle.iterdir() if p.is_dir() and (p / "SKILL.md").exists())
 
 
@@ -168,18 +154,6 @@ def sync_skills(
     dry_run: bool = False,
     force: bool = True,
 ) -> list[str]:
-    """
-    Copy each bundled skill directory into *dest*.
-
-    Args:
-        bundle: Path to the bundle package on disk.
-        dest: Target directory (e.g. ``~/.cursor/skills``).
-        dry_run: If True, print what would happen but do not write.
-        force: Overwrite existing skill directories (default True).
-
-    Returns:
-        List of skill names that were synced (or would be synced).
-    """
     skills = list_skills(bundle)
     synced: list[str] = []
 
@@ -204,80 +178,8 @@ def sync_skills(
     return synced
 
 
-def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="axiompy-skills",
-        description=(
-            "Sync bundled AxiomPy Cursor SKILL.md trees to one resolved directory. "
-            "Does not copy AGENTS.md or .cursorrules."
-        ),
-    )
-    parser.add_argument(
-        "--show-config",
-        action="store_true",
-        help="Print resolved skills parent directory and config source, then exit (no sync).",
-    )
-    parser.add_argument(
-        "--list",
-        action="store_true",
-        dest="list_only",
-        help="List bundled skills and exit.",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be synced without writing files.",
-    )
-    parser.add_argument(
-        "--project",
-        action="store_true",
-        help="Sync into <cwd>/.cursor/skills/ (overrides env and pyproject unless --dest).",
-    )
-    parser.add_argument(
-        "--dest",
-        type=Path,
-        default=None,
-        help="Custom parent directory for skill folders (highest precedence).",
-    )
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        default=True,
-        help="Overwrite existing skill directories (default: True).",
-    )
-    parser.add_argument(
-        "--no-force",
-        action="store_false",
-        dest="force",
-        help="Skip existing skill directories instead of overwriting.",
-    )
-    parser.add_argument(
-        "--version",
-        action="store_true",
-        help="Print axiompy version and exit.",
-    )
-    return parser
-
-
-def main(argv: Sequence[str] | None = None) -> int:
-    """CLI entry-point for ``axiompy-skills``."""
-    parser = _build_parser()
-    args = parser.parse_args(argv)
-    cwd = Path.cwd()
-
-    if args.version:
-        print(f"axiompy {_axiompy_version()}")
-        return 0
-
-    bundle = _bundle_root()
-
-    if args.list_only:
-        skills = list_skills(bundle)
-        print(f"Bundled skills ({len(skills)}):")
-        for s in skills:
-            print(f"  - {s}")
-        return 0
-
+def _run_sync(args: argparse.Namespace, cwd: Path) -> int:
+    bundle = skills_bundle_root()
     dest, source = resolve_skills_destination(
         cwd=cwd,
         dest=args.dest,
@@ -306,6 +208,179 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"\n{len(synced)} skill(s) {'would be synced' if args.dry_run else 'synced'}.")
 
     return 0
+
+
+def _add_sync_flags(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--show-config",
+        action="store_true",
+        help="Print resolved skills parent directory and config source, then exit.",
+    )
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        dest="list_only",
+        help="List bundled skills and exit.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be synced without writing files.",
+    )
+    parser.add_argument(
+        "--project",
+        action="store_true",
+        help="Sync into <cwd>/.cursor/skills/.",
+    )
+    parser.add_argument(
+        "--dest",
+        type=Path,
+        default=None,
+        help="Custom parent directory for skill folders.",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        default=True,
+        help="Overwrite existing skill directories (default: True).",
+    )
+    parser.add_argument(
+        "--no-force",
+        action="store_false",
+        dest="force",
+        help="Skip existing skill directories instead of overwriting.",
+    )
+    parser.add_argument(
+        "--version",
+        action="store_true",
+        help="Print axiompy version and exit.",
+    )
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="axiompy-skills",
+        description=(
+            "Sync bundled AxiomPy Cursor SKILL.md trees and AAL domain tooling. "
+            "Run without a subcommand to sync skills only."
+        ),
+    )
+    _add_sync_flags(parser)
+
+    sub = parser.add_subparsers(dest="command")
+
+    install = sub.add_parser("install", help="Sync skills + AAL registry, hooks, CI templates")
+    install.add_argument("--project", action="store_true", help="Install under <cwd>/.cursor/")
+    install.add_argument("--hooks", action="store_true", help="Install hooks and aal.mdc rule")
+    install.add_argument("--no-ci", action="store_true", help="Skip CI workflow template")
+    install.add_argument("--force", action="store_true", help="Overwrite existing config files")
+    install.add_argument("--dry-run", action="store_true")
+
+    upgrade = sub.add_parser(
+        "upgrade", help="Re-apply manifest-managed paths after package upgrade"
+    )
+    upgrade.add_argument("--force", action="store_true")
+    upgrade.add_argument("--dry-run", action="store_true")
+
+    verify = sub.add_parser("verify-domains", help="Verify @!domain annotations resolve to skills")
+    verify.add_argument("--strict", action="store_true")
+    verify.add_argument("--files", nargs="+", default=None, help="Only check these paths")
+
+    resolve = sub.add_parser("resolve", help="Resolve domains and skill content for inject")
+    resolve.add_argument("--file", required=True)
+    resolve.add_argument("--line", type=int, default=None)
+    resolve.add_argument("--json", action="store_true")
+
+    bootstrap = sub.add_parser("bootstrap", help="Bootstrap file-level annotations")
+    boot_sub = bootstrap.add_subparsers(dest="bootstrap_cmd", required=True)
+    boot_sub.add_parser("suggest", help="Suggest domains for unannotated P0 files")
+    apply_p = boot_sub.add_parser("apply", help="Apply file-level annotations")
+    apply_p.add_argument("--level", choices=["file"], default="file")
+    apply_p.add_argument(
+        "--apply", action="store_true", help="Write annotations (default: dry-run)"
+    )
+
+    annotate = sub.add_parser("annotate", help="Add file-level @!domain to an existing file")
+    annotate.add_argument("file")
+    annotate.add_argument("--domain", required=True)
+    annotate.add_argument("--dry-run", action="store_true")
+
+    doctor = sub.add_parser("doctor", help="Verify AAL installation health")
+    doctor.add_argument("--strict", action="store_true")
+
+    return parser
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+    cwd = Path.cwd()
+
+    if args.version:
+        print(f"axiompy {_axiompy_version()}")
+        return 0
+
+    if args.list_only:
+        bundle = skills_bundle_root()
+        skills = list_skills(bundle)
+        print(f"Bundled skills ({len(skills)}):")
+        for s in skills:
+            print(f"  - {s}")
+        return 0
+
+    if args.command is None:
+        return _run_sync(args, cwd)
+
+    root = cwd.resolve()
+
+    if args.command == "install":
+        from axiompy.aal.install import InstallOptions, cmd_install
+
+        dest, _ = resolve_skills_destination(cwd=cwd, dest=None, project=args.project)
+        opts = InstallOptions(
+            root=root,
+            project=args.project,
+            hooks=args.hooks,
+            ci=not args.no_ci,
+            force=args.force,
+            dry_run=args.dry_run,
+        )
+        return cmd_install(opts, skills_dest=dest if args.project else None)
+
+    if args.command == "upgrade":
+        from axiompy.aal.install import cmd_upgrade
+
+        return cmd_upgrade(root, force=args.force, dry_run=args.dry_run)
+
+    if args.command == "verify-domains":
+        from axiompy.aal.verify import cmd_verify_domains
+
+        return cmd_verify_domains(root, args.strict, files=args.files)
+
+    if args.command == "resolve":
+        from axiompy.aal.resolve import cmd_resolve
+
+        return cmd_resolve(root, args.file, line=args.line, as_json=args.json)
+
+    if args.command == "bootstrap":
+        from axiompy.aal.bootstrap import cmd_bootstrap_apply, cmd_bootstrap_suggest
+
+        if args.bootstrap_cmd == "suggest":
+            return cmd_bootstrap_suggest(root)
+        return cmd_bootstrap_apply(root, level=args.level, dry_run=not args.apply)
+
+    if args.command == "annotate":
+        from axiompy.aal.bootstrap import cmd_annotate
+
+        return cmd_annotate(root, args.file, args.domain, dry_run=args.dry_run)
+
+    if args.command == "doctor":
+        from axiompy.aal.doctor import cmd_doctor
+
+        return cmd_doctor(root, strict=args.strict)
+
+    parser.print_help()
+    return 2
 
 
 if __name__ == "__main__":

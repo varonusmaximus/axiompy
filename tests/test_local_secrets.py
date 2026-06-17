@@ -1,3 +1,5 @@
+# @!testing
+
 """Tests for the LOCAL secrets backend (axiompy.secrets)."""
 
 import pytest

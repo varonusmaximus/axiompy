@@ -1,3 +1,5 @@
+# @!testing
+
 """
 Unit tests for the loggers module.
 

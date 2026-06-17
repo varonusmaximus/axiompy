@@ -1,3 +1,5 @@
+# @!testing
+
 """
 Comprehensive tests for Railway-Oriented Programming Result types.
 

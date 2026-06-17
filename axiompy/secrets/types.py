@@ -1,3 +1,5 @@
+# @!code-style
+
 """
 Type definitions for secrets management.
 
