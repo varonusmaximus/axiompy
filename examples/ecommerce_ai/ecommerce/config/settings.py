@@ -1,3 +1,5 @@
+# @!documentation
+
 """Configuration settings for E-commerce AI system.
 
 AI Provider Setup:

@@ -1,3 +1,5 @@
+# @!documentation
+
 #!/usr/bin/env python3
 """
 🛍️  Interactive E-Commerce Data Intelligence Demo

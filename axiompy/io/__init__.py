@@ -1,4 +1,4 @@
-# @!code-style
+# @!io
 
 """
 I/O utilities for file, database, HTTP, JSON-RPC, and object storage operations

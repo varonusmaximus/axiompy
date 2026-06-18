@@ -1,4 +1,4 @@
-# @!code-style
+# @!secrets
 
 """
 Concrete implementations of secret clients for various backends.

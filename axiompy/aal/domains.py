@@ -1,4 +1,4 @@
-# @!code-style,testing
+# @!tooling
 
 """Resolve AAL domains to Cursor SKILL.md paths."""
 

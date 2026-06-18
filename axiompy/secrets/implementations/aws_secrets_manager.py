@@ -1,4 +1,4 @@
-# @!code-style
+# @!secrets
 
 """
 AWS Secrets Manager secret client implementation.

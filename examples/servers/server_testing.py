@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Examples demonstrating how to test web applications using the server abstraction.
 

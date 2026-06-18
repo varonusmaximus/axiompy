@@ -1,4 +1,4 @@
-# @!code-style
+# @!io
 
 """
 Web framework utilities for HTTP layers (framework-agnostic).

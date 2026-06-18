@@ -1,4 +1,4 @@
-# @!code-style
+# @!mcp
 
 """
 MCP Service Layer - Business logic for exposing MCP servers via HTTP.

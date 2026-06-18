@@ -1,3 +1,5 @@
+# @!documentation
+
 """E-commerce data service with customer and order analysis."""
 
 from axiompy.reasoning import (

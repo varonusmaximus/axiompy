@@ -1,4 +1,4 @@
-# @!code-style
+# @!servers
 
 """
 Web server abstraction layer with support for Flask and FastAPI.

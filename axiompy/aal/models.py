@@ -1,4 +1,4 @@
-# @!code-style,testing
+# @!tooling
 
 from __future__ import annotations
 

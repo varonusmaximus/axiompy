@@ -1,1 +1,1 @@
-# @!code-style
+# @!core

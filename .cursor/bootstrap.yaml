@@ -2,20 +2,51 @@ p0_globs:
   - "axiompy/**"
   - "tests/**"
   - "bundles/**"
+  - "docs/**"
+  - "examples/**"
 
-default_domain: code-style
+default_domain: core
 max_domains_per_annotation: 3
 warn_if_domains_count_gt: 1
 
 path_hints:
   - glob: "tests/**"
     domain: testing
-  - glob: "axiompy/cli/**"
-    domain: code-style
   - glob: "axiompy/aal/**"
-    domains: [code-style, testing]
-  - glob: "bundles/**"
+    domain: tooling
+  - glob: "axiompy/cli/**"
+    domain: tooling
+  - glob: "bundles/axiompy_aal_templates/**"
+    domain: tooling
+  - glob: "axiompy/secrets/**"
+    domain: secrets
+  - glob: "axiompy/servers/mcp*.py"
+    domain: mcp
+  - glob: "axiompy/servers/**"
+    domain: servers
+  - glob: "axiompy/io/jsonrpc.py"
+    domain: rpc
+  - glob: "axiompy/servers/jsonrpc.py"
+    domain: rpc
+  - glob: "axiompy/io/database.py"
+    domain: storage
+  - glob: "axiompy/io/object.py"
+    domain: object
+  - glob: "axiompy/io/**"
+    domain: io
+  - glob: "axiompy/web.py"
+    domain: io
+  - glob: "bundles/axiompy_skills/**"
     domain: documentation
+  - glob: "docs/**"
+    domain: documentation
+  - glob: "examples/**"
+    domain: documentation
+  - glob: "Makefile"
+    domain: delivery
+  - glob: ".github/**"
+    domain: delivery
+  - glob: "axiompy/**"
+    domain: core
 
-incompatible_pairs:
-  - [code-review, testing]
+incompatible_pairs: []

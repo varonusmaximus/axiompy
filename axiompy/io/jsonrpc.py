@@ -1,4 +1,4 @@
-# @!code-style
+# @!rpc
 
 """
 JSON-RPC 2.0 Client implementation with HTTP transport.

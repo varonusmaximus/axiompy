@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Real-world streaming examples using axiompy.data.streaming.
 

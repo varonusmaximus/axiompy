@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Custom error hierarchy for the API.
 

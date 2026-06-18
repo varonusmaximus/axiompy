@@ -1,3 +1,5 @@
+# @!documentation
+
 """Demo: SQL Validation with Automatic Retry
 
 This demonstrates the QueryAgent's intelligent retry mechanism:

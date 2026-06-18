@@ -1,4 +1,4 @@
-# @!code-style
+# @!mcp
 
 """
 MCP Tool Validation & Sequencing Layer

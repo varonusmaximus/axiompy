@@ -1,4 +1,4 @@
-# @!code-style
+# @!object
 
 """
 Object storage abstraction layer with support for multiple cloud providers.

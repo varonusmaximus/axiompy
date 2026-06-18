@@ -14,6 +14,7 @@ Bridge document between the portable AAL spec and this repository's implementati
 | `aal resolve` | `axiompy-skills resolve --file PATH --line N --json` |
 | `aal bootstrap suggest` | `axiompy-skills bootstrap suggest` |
 | `aal bootstrap apply --level file` | `axiompy-skills bootstrap apply --level file --apply` |
+| `aal bootstrap migrate` | `axiompy-skills bootstrap migrate --apply` |
 | `aal annotate FILE --domain D` | `axiompy-skills annotate FILE --domain D` |
 | `aal doctor --strict` | `axiompy-skills doctor --strict` |
 
@@ -31,18 +32,30 @@ Python API: `axiompy.aal` (`parser`, `verify`, `resolve`, `middleware`, `bootstr
 | `.agent/skills/*.md` | `.cursor/skills/<domain>/SKILL.md` |
 | `{stem}.override.md` | `.cursor/skills/<domain>.override/SKILL.md` |
 
-## Bundled domains
+## Function domains vs skill packages
 
-Domain names match existing skill folder names in `bundles/axiompy_skills/`:
+Annotations use **function domain** names (what the code does). Each domain maps to one or more **skill packages** injected at edit time:
 
-| Annotation | Skill path |
-|------------|------------|
-| `# @!code-review` | `.cursor/skills/code-review/SKILL.md` |
-| `# @!code-style` | `.cursor/skills/code-style/SKILL.md` |
-| `# @!design-patterns` | `.cursor/skills/design-patterns/SKILL.md` |
-| `# @!documentation` | `.cursor/skills/documentation/SKILL.md` |
-| `# @!ship-it` | `.cursor/skills/ship-it/SKILL.md` |
-| `# @!testing` | `.cursor/skills/testing/SKILL.md` |
+| Domain | Skills injected |
+|--------|-----------------|
+| `core` | code-style |
+| `io` | code-style, design-patterns |
+| `storage` | code-style, design-patterns |
+| `object` | code-style, design-patterns |
+| `rpc` | code-style, design-patterns |
+| `servers` | code-style, design-patterns |
+| `mcp` | code-style, design-patterns, code-review |
+| `secrets` | code-style, design-patterns, code-review |
+| `tooling` | code-style, design-patterns, testing |
+| `testing` | code-style, testing |
+| `documentation` | code-style, documentation |
+| `delivery` | code-style, ship-it, testing |
+
+Example: `# @!tooling` on `axiompy/aal/install.py` injects code-style + design-patterns + testing skills.
+
+> **FIXME:** `io` is intentionally broad (HTTP, files, serialization, web). Split into `http`, `file`, and `serialization` domains later.
+
+Skill packages live under `.cursor/skills/<name>/SKILL.md` (ingredients, not annotation targets).
 
 ## Templates package
 

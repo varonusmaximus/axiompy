@@ -1,3 +1,5 @@
+# @!documentation
+
 #!/usr/bin/env python3
 """
 JSON-RPC 2.0 Server Examples

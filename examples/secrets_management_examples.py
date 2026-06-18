@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Examples demonstrating the axiompy secrets management module.
 

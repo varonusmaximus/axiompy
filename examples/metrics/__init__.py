@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Metrics Service API Example Package
 

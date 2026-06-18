@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 MCP Server Testing Example
 

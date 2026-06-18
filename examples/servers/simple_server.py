@@ -1,3 +1,5 @@
+# @!documentation
+
 # Same code works with Flask or FastAPI!
 from axiompy.servers import ServerFactory, ServerSettings, ServerType
 

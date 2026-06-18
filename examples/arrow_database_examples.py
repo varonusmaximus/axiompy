@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Arrow Database Examples
 

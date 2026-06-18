@@ -1,4 +1,4 @@
-# @!code-style
+# @!io
 
 """
 Async HTTP client with batched concurrent requests and transport-agnostic outcomes.

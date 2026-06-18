@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Examples demonstrating how to mock the database abstraction for unit testing.
 

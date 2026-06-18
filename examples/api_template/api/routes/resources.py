@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Resource endpoints - HTTP adapter layer between FastAPI and domain layer.
 

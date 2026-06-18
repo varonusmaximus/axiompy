@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Examples demonstrating the axiompy.data module for data engineering.
 

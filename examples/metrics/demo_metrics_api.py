@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Quick demonstration of the Metrics Service API.
 

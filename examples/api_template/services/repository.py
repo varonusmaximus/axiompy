@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Repository layer - Data access abstraction.
 

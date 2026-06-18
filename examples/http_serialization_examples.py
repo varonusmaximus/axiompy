@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Examples demonstrating the new flexible HTTPClient with serializers/deserializers.
 

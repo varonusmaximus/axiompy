@@ -1,1 +1,3 @@
+# @!documentation
+
 """Integration tests module."""

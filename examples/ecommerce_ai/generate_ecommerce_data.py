@@ -1,3 +1,5 @@
+# @!documentation
+
 """Generate synthetic e-commerce data with customers and shopping history.
 
 Creates a SQLite database with ~1 million records demonstrating realistic

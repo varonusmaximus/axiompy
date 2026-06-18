@@ -1,3 +1,5 @@
+# @!documentation
+
 """Health check endpoints."""
 
 import time

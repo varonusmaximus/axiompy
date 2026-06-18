@@ -1,4 +1,4 @@
-# @!code-style
+# @!tooling
 
 """
 Sync bundled Cursor skills and AAL tooling to the local filesystem.
@@ -299,6 +299,12 @@ def _build_parser() -> argparse.ArgumentParser:
     apply_p.add_argument(
         "--apply", action="store_true", help="Write annotations (default: dry-run)"
     )
+    migrate_p = boot_sub.add_parser(
+        "migrate", help="Replace existing file-level annotations from path hints"
+    )
+    migrate_p.add_argument(
+        "--apply", action="store_true", help="Write annotations (default: dry-run)"
+    )
 
     annotate = sub.add_parser("annotate", help="Add file-level @!domain to an existing file")
     annotate.add_argument("file")
@@ -363,10 +369,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         return cmd_resolve(root, args.file, line=args.line, as_json=args.json)
 
     if args.command == "bootstrap":
-        from axiompy.aal.bootstrap import cmd_bootstrap_apply, cmd_bootstrap_suggest
+        from axiompy.aal.bootstrap import (
+            cmd_bootstrap_apply,
+            cmd_bootstrap_migrate,
+            cmd_bootstrap_suggest,
+        )
 
         if args.bootstrap_cmd == "suggest":
             return cmd_bootstrap_suggest(root)
+        if args.bootstrap_cmd == "migrate":
+            return cmd_bootstrap_migrate(root, dry_run=not args.apply)
         return cmd_bootstrap_apply(root, level=args.level, dry_run=not args.apply)
 
     if args.command == "annotate":

@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Domain layer - Core business entities.
 

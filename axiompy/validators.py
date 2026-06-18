@@ -1,4 +1,4 @@
-# @!code-style
+# @!core
 
 """
 Validation module providing flexible assertion-like validators with default and

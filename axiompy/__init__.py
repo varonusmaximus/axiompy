@@ -1,4 +1,4 @@
-# @!code-style
+# @!core
 
 """
 AxiomPy - Core Python utilities

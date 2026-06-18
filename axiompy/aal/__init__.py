@@ -1,4 +1,4 @@
-# @!code-style,testing
+# @!tooling
 
 """Agent Annotation Language (AAL) — domain annotations and skill inject for AxiomPy."""
 

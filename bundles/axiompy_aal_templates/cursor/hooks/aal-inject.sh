@@ -1,4 +1,4 @@
-# @!documentation
+# @!tooling
 
 #!/usr/bin/env bash
 # AAL inject hook — resolves domain skills before Write/Edit.

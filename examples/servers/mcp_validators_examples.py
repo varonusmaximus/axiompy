@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 MCP with Chainable Validators Example
 

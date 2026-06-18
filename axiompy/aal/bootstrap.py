@@ -1,4 +1,4 @@
-# @!code-style,testing
+# @!tooling
 
 from __future__ import annotations
 
@@ -93,7 +93,7 @@ def suggest_annotations(root: Path) -> list[dict]:
     config = load_config(root)
     p0_globs = bootstrap.get("p0_globs", ["**/*.py"])
     hints = bootstrap.get("path_hints", [])
-    default_domain = bootstrap.get("default_domain", "code-style")
+    default_domain = bootstrap.get("default_domain", "core")
     incompatible = bootstrap.get("incompatible_pairs", [])
     known = set(list_domain_names(root))
 
@@ -183,6 +183,96 @@ def cmd_bootstrap_apply(root: Path, *, level: str, dry_run: bool = True) -> int:
     print(f"\n[AAL] {label} {applied} file(s).")
     if dry_run:
         print("Re-run with --apply to write annotations.")
+    return 0
+
+
+def migrate_annotations(root: Path) -> list[dict]:
+    """Recompute domains for already-annotated P0 files from path hints."""
+    bootstrap = _load_bootstrap(root)
+    config = load_config(root)
+    p0_globs = bootstrap.get("p0_globs", ["**/*.py"])
+    hints = bootstrap.get("path_hints", [])
+    default_domain = bootstrap.get("default_domain", "core")
+    incompatible = bootstrap.get("incompatible_pairs", [])
+    known = set(list_domain_names(root))
+
+    migrations: list[dict] = []
+    for path in iter_source_files(root, config):
+        rel = str(path.relative_to(root))
+        if not any(_path_matches_glob(rel, g) for g in p0_globs):
+            continue
+
+        ext, content = read_file_for_parse(path, config)
+        aal = parse_aal_file(content, ext)
+        if not aal.compact:
+            continue
+
+        hint = _match_hint(rel, hints)
+        domains = _domains_from_hint(hint) if hint else [default_domain]
+        domains = [d for d in domains if d in known][:3]
+        if not domains:
+            domains = [default_domain] if default_domain in known else []
+
+        old_domains = list(aal.compact[0].domains)
+        if domains == old_domains:
+            continue
+
+        warnings = _warn_incompatible(domains, incompatible)
+        if len(domains) > 1:
+            warnings.append("multiple domains on file-level annotation")
+
+        migrations.append(
+            {
+                "file": rel,
+                "old_domains": old_domains,
+                "domains": domains,
+                "warnings": warnings,
+            }
+        )
+    return migrations
+
+
+def cmd_bootstrap_migrate(root: Path, *, dry_run: bool = True) -> int:
+    migrations = migrate_annotations(root)
+    if not migrations:
+        print("[AAL] No bootstrap migrations (annotations already match path hints).")
+        return 0
+
+    applied = 0
+    for item in migrations:
+        old = ",".join(item["old_domains"])
+        domains = ",".join(item["domains"])
+        label = f"  {item['file']}  @!{old}  →  @!{domains}"
+        if dry_run:
+            print(label)
+            for warn in item["warnings"]:
+                print(f"    WARN: {warn}")
+            applied += 1
+            continue
+
+        path = root / item["file"]
+        ext = path.suffix
+        prefix = comment_prefix(ext)
+        line = f"{prefix} @!{domains}"
+
+        content = path.read_text(encoding="utf-8")
+        aal = parse_aal_file(content, ext)
+        line_no = aal.compact[0].line_no
+        lines = content.splitlines()
+        lines[line_no - 1] = line
+        new_content = "\n".join(lines)
+        if content.endswith("\n"):
+            new_content += "\n"
+        path.write_text(new_content, encoding="utf-8")
+        print(label)
+        for warn in item["warnings"]:
+            print(f"    WARN: {warn}")
+        applied += 1
+
+    action = "would migrate" if dry_run else "migrated"
+    print(f"\n[AAL] {action} {applied} file(s).")
+    if dry_run:
+        print("Re-run with --apply to rewrite annotations.")
     return 0
 
 

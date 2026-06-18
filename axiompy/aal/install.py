@@ -1,4 +1,4 @@
-# @!code-style,testing
+# @!tooling
 
 from __future__ import annotations
 
@@ -9,8 +9,12 @@ from pathlib import Path
 
 from axiompy.aal import __version__
 from axiompy.aal.bundle import bundled_file, load_manifest
-from axiompy.aal.constants import BOOTSTRAP_FILE, MANIFEST_FILE, cursor_config_dir_name
-from axiompy.aal.domains import skill_path_for_domain
+from axiompy.aal.constants import (
+    BOOTSTRAP_FILE,
+    DOMAINS_FILE,
+    MANIFEST_FILE,
+    cursor_config_dir_name,
+)
 from axiompy.cli.cursor_skills import list_skills, skills_bundle_root, sync_skills
 
 
@@ -39,28 +43,6 @@ def _copy_template(src: Path, dest: Path, opts: InstallOptions) -> bool:
     return True
 
 
-def _generate_domains_yaml(skill_names: list[str]) -> str:
-    lines = ["domains:"]
-    for name in skill_names:
-        lines.append(f"  {name}:")
-        lines.append("    skills:")
-        lines.append(f"      - {skill_path_for_domain(name)}")
-    return "\n".join(lines) + "\n"
-
-
-def _write_text(dest: Path, content: str, opts: InstallOptions) -> bool:
-    if dest.exists() and not opts.force:
-        print(f"  skip (exists): {dest.relative_to(opts.root)}")
-        return False
-    if opts.dry_run:
-        print(f"  would write: {dest.relative_to(opts.root)}")
-        return True
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(content, encoding="utf-8")
-    print(f"  wrote: {dest.relative_to(opts.root)}")
-    return True
-
-
 def cmd_install(opts: InstallOptions, *, skills_dest: Path | None = None) -> int:
     manifest = load_manifest()
     cursor_dir = opts.root / cursor_config_dir_name()
@@ -79,8 +61,7 @@ def cmd_install(opts: InstallOptions, *, skills_dest: Path | None = None) -> int
         sync_skills(bundle, skills_parent, dry_run=False, force=opts.force)
 
     print("[AAL] Registry:")
-    domains_path = cursor_dir / "domains.yaml"
-    _write_text(domains_path, _generate_domains_yaml(skill_names), opts)
+    _copy_template(bundled_file(DOMAINS_FILE), cursor_dir / DOMAINS_FILE, opts)
 
     for rel in ("aal.yaml", BOOTSTRAP_FILE):
         src = bundled_file(rel)
@@ -114,6 +95,7 @@ def cmd_install(opts: InstallOptions, *, skills_dest: Path | None = None) -> int
         "version": manifest.get("version", "1.0"),
         "axiompy_version": __version__,
         "managed_paths": managed,
+        "function_domains": manifest.get("function_domains", []),
         "skills": skill_names,
     }
     manifest_path = cursor_dir / MANIFEST_FILE
@@ -131,8 +113,9 @@ def cmd_install(opts: InstallOptions, *, skills_dest: Path | None = None) -> int
     print("\n[AAL] Installation complete.")
     print("\nNext steps:")
     print("  1. axiompy-skills bootstrap suggest")
-    print("  2. axiompy-skills bootstrap apply --level file")
-    print("  3. axiompy-skills verify-domains --strict")
+    print("  2. axiompy-skills bootstrap apply --level file --apply")
+    print("  3. axiompy-skills bootstrap migrate --apply   # if replacing skill-name annotations")
+    print("  4. axiompy-skills verify-domains --strict")
     return 0
 
 

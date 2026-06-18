@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Application configuration management using AxiomPy config patterns.
 """

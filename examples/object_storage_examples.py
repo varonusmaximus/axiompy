@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Examples demonstrating the object storage abstraction layer.
 

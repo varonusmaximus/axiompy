@@ -1,3 +1,5 @@
+# @!documentation
+
 """E-commerce AI Intelligence System
 
 Demonstrates AxiomPy reasoning framework with real-world e-commerce data.

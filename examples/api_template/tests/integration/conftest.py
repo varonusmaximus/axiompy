@@ -1,3 +1,5 @@
+# @!documentation
+
 """Shared fixtures for integration tests."""
 
 import asyncio

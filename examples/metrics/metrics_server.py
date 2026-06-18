@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Metrics Service API using axiompy FastAPI and Database tools.
 

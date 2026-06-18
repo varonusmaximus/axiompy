@@ -1,3 +1,5 @@
+# @!documentation
+
 #!/usr/bin/env python3
 """
 AI Code Review Script for GitHub Actions.

@@ -1,3 +1,5 @@
+# @!documentation
+
 #!/usr/bin/env bash
 # AAL inject hook — resolves domain skills before Write/Edit.
 set -euo pipefail
@@ -9,6 +11,7 @@ FILE="${CURSOR_FILE_PATH:-${FILE:-}}"
 LINE="${CURSOR_LINE:-${LINE:-1}}"
 
 if [[ -z "$FILE" ]]; then
+  # No file context — allow tool use
   exit 0
 fi
 

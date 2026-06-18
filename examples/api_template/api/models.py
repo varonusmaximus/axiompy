@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 HTTP Request and Response models (Pydantic adapters).
 

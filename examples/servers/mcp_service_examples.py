@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Examples of exposing MCPServer via HTTP using Service Layer Pattern with ROP.
 

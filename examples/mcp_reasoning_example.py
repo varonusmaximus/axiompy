@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 MCP Reasoning Middleware Examples
 

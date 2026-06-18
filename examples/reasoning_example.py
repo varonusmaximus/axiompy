@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 AxiomPy Reasoning Example - AI-Powered Query Agent
 

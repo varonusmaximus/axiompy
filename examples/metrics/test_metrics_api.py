@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Test script for the Metrics Service API.
 

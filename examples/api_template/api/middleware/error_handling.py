@@ -1,3 +1,5 @@
+# @!documentation
+
 """Framework-agnostic error handling utilities.
 
 Error handling is implemented at the handler level using:

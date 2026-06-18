@@ -1,1 +1,3 @@
+# @!documentation
+
 """Configuration module."""

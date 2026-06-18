@@ -1,4 +1,4 @@
-# @!code-style
+# @!io
 
 """
 File I/O utilities for simplified reading from disk

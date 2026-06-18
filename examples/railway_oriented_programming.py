@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Railway-Oriented Programming Examples with CoreResult.
 

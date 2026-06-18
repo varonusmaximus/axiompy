@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Basic MCP Server Example
 

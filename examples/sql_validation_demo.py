@@ -1,3 +1,5 @@
+# @!documentation
+
 """Demo: SQL Validation Before Execution
 
 This demonstrates the new SQL validation capabilities:

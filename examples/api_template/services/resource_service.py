@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Service layer - Business logic for resources.
 

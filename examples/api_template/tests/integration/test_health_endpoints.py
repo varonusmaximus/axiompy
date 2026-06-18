@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Integration tests for health check endpoints.
 

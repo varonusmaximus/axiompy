@@ -1,4 +1,4 @@
-# @!code-style
+# @!servers
 
 """
 Web server abstractions for Flask and FastAPI, MCP server abstractions for AI agent frameworks,

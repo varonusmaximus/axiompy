@@ -1,4 +1,4 @@
-# @!code-style
+# @!core
 
 """
 Decorator utilities for logging, error handling, and tracing

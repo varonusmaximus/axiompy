@@ -10,6 +10,20 @@
     ".cursor/rules/aal.mdc",
     ".github/workflows/axiompy-aal-gate.yml"
   ],
+  "function_domains": [
+    "core",
+    "io",
+    "storage",
+    "object",
+    "rpc",
+    "servers",
+    "mcp",
+    "secrets",
+    "tooling",
+    "testing",
+    "documentation",
+    "delivery"
+  ],
   "skills": [
     "code-review",
     "code-style",

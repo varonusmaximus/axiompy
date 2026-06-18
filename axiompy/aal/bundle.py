@@ -1,4 +1,4 @@
-# @!code-style,testing
+# @!tooling
 
 from __future__ import annotations
 
@@ -31,4 +31,6 @@ def bundled_file(relative: str) -> Path:
 
 def list_bundled_domains() -> list[str]:
     manifest = load_manifest()
+    if function_domains := manifest.get("function_domains"):
+        return list(function_domains)
     return list(manifest.get("domains", {}).keys())

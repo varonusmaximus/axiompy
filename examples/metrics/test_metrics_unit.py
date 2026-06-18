@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Unit tests for the Metrics Service components.
 

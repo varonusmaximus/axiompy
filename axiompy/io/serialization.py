@@ -1,4 +1,4 @@
-# @!code-style
+# @!io
 
 """
 Serialization and deserialization utilities for HTTP clients.

@@ -1,3 +1,5 @@
+# @!documentation
+
 #!/usr/bin/env python3
 """
 Quick test script to verify SQL generation and execution works.

@@ -1,3 +1,5 @@
+# @!documentation
+
 #!/usr/bin/env python
 """Main demo script for E-commerce AI Intelligence System.
 

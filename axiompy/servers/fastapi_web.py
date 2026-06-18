@@ -1,4 +1,4 @@
-# @!code-style
+# @!servers
 
 """
 FastAPI integration for axiompy.web HttpResponseError.

@@ -1,25 +1,27 @@
 {
   "version": "1.0",
-  "domains": {
-    "code-review": {
-      "skills": [".cursor/skills/code-review/SKILL.md"]
-    },
-    "code-style": {
-      "skills": [".cursor/skills/code-style/SKILL.md"]
-    },
-    "design-patterns": {
-      "skills": [".cursor/skills/design-patterns/SKILL.md"]
-    },
-    "documentation": {
-      "skills": [".cursor/skills/documentation/SKILL.md"]
-    },
-    "ship-it": {
-      "skills": [".cursor/skills/ship-it/SKILL.md"]
-    },
-    "testing": {
-      "skills": [".cursor/skills/testing/SKILL.md"]
-    }
-  },
+  "function_domains": [
+    "core",
+    "io",
+    "storage",
+    "object",
+    "rpc",
+    "servers",
+    "mcp",
+    "secrets",
+    "tooling",
+    "testing",
+    "documentation",
+    "delivery"
+  ],
+  "skill_packages": [
+    "code-review",
+    "code-style",
+    "design-patterns",
+    "documentation",
+    "ship-it",
+    "testing"
+  ],
   "managed_paths": [
     ".cursor/domains.yaml",
     ".cursor/aal.yaml",

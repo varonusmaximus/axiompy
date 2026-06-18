@@ -1,3 +1,5 @@
+# @!documentation
+
 """
 Examples of using the axiompy server abstraction layer.
 

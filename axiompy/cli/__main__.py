@@ -1,4 +1,4 @@
-# @!code-style
+# @!tooling
 
 """Allow ``python -m axiompy.cli.cursor_skills`` as an alias for ``axiompy-skills``."""
 

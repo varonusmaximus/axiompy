@@ -1,3 +1,5 @@
+# @!documentation
+
 #!/usr/bin/env python
 """Setup script to generate e-commerce database with 1M records."""
 
