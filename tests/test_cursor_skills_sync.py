@@ -15,7 +15,7 @@ from axiompy.cli.cursor_skills import (
     sync_skills,
 )
 
-EXPECTED_SKILLS = [
+EXPECTED_PACKAGES = [
     "code-review",
     "code-style",
     "design-patterns",
@@ -23,6 +23,21 @@ EXPECTED_SKILLS = [
     "ship-it",
     "testing",
 ]
+
+EXPECTED_DOMAIN_SKILLS = [
+    "core",
+    "delivery",
+    "io",
+    "mcp",
+    "object",
+    "rpc",
+    "secrets",
+    "servers",
+    "storage",
+    "tooling",
+]
+
+EXPECTED_SKILLS = sorted(EXPECTED_PACKAGES + EXPECTED_DOMAIN_SKILLS)
 
 
 class TestBundleRoot:
@@ -35,8 +50,10 @@ class TestBundleRoot:
     def test_bundle_contains_skill_dirs(self):
         bundle = _bundle_root()
         skill_dirs = {p.name for p in bundle.iterdir() if p.is_dir()}
-        for skill in EXPECTED_SKILLS:
-            assert skill in skill_dirs, f"Missing skill directory: {skill}"
+        for skill in EXPECTED_PACKAGES:
+            assert skill in skill_dirs, f"Missing package directory: {skill}"
+        for skill in EXPECTED_DOMAIN_SKILLS:
+            assert skill in skill_dirs, f"Missing domain skill directory: {skill}"
 
 
 class TestListSkills:

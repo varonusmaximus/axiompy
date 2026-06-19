@@ -3,36 +3,42 @@ domains:
     summary: "Cross-cutting utilities — style and clarity"
     skills:
       - .cursor/skills/code-style/SKILL.md
+      - .cursor/skills/core/SKILL.md
 
   io:
     summary: "FIXME: broad interim — HTTP, files, serialization, web (split into http/file later)"
     skills:
       - .cursor/skills/code-style/SKILL.md
       - .cursor/skills/design-patterns/SKILL.md
+      - .cursor/skills/io/SKILL.md
 
   storage:
     summary: "Databases — factories, SQL, adapters"
     skills:
       - .cursor/skills/code-style/SKILL.md
       - .cursor/skills/design-patterns/SKILL.md
+      - .cursor/skills/storage/SKILL.md
 
   object:
     summary: "Cloud object/blob storage — S3, GCS, Azure"
     skills:
       - .cursor/skills/code-style/SKILL.md
       - .cursor/skills/design-patterns/SKILL.md
+      - .cursor/skills/object/SKILL.md
 
   rpc:
     summary: "JSON-RPC client and server protocol"
     skills:
       - .cursor/skills/code-style/SKILL.md
       - .cursor/skills/design-patterns/SKILL.md
+      - .cursor/skills/rpc/SKILL.md
 
   servers:
     summary: "Inbound servers — factories, hexagonal boundaries"
     skills:
       - .cursor/skills/code-style/SKILL.md
       - .cursor/skills/design-patterns/SKILL.md
+      - .cursor/skills/servers/SKILL.md
 
   mcp:
     summary: "MCP services, reasoning hooks, validators"
@@ -40,6 +46,7 @@ domains:
       - .cursor/skills/code-style/SKILL.md
       - .cursor/skills/design-patterns/SKILL.md
       - .cursor/skills/code-review/SKILL.md
+      - .cursor/skills/mcp/SKILL.md
 
   secrets:
     summary: "Secrets and KMS — patterns + security review"
@@ -47,6 +54,7 @@ domains:
       - .cursor/skills/code-style/SKILL.md
       - .cursor/skills/design-patterns/SKILL.md
       - .cursor/skills/code-review/SKILL.md
+      - .cursor/skills/secrets/SKILL.md
 
   tooling:
     summary: "CLI and AAL — style, patterns, tests"
@@ -54,6 +62,7 @@ domains:
       - .cursor/skills/code-style/SKILL.md
       - .cursor/skills/design-patterns/SKILL.md
       - .cursor/skills/testing/SKILL.md
+      - .cursor/skills/tooling/SKILL.md
 
   testing:
     summary: "pytest suite — style + testing standards"
@@ -73,3 +82,4 @@ domains:
       - .cursor/skills/code-style/SKILL.md
       - .cursor/skills/ship-it/SKILL.md
       - .cursor/skills/testing/SKILL.md
+      - .cursor/skills/delivery/SKILL.md

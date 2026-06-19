@@ -22,6 +22,18 @@
     "ship-it",
     "testing"
   ],
+  "domain_skills": [
+    "core",
+    "delivery",
+    "io",
+    "mcp",
+    "object",
+    "rpc",
+    "secrets",
+    "servers",
+    "storage",
+    "tooling"
+  ],
   "managed_paths": [
     ".cursor/domains.yaml",
     ".cursor/aal.yaml",

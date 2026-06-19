@@ -34,28 +34,60 @@ Python API: `axiompy.aal` (`parser`, `verify`, `resolve`, `middleware`, `bootstr
 
 ## Function domains vs skill packages
 
-Annotations use **function domain** names (what the code does). Each domain maps to one or more **skill packages** injected at edit time:
+Annotations use **function domain** names (what the code does). Inject composes **shared packages** and **domain skill folders** — there is no `@include` syntax inside markdown.
 
-| Domain | Skills injected |
-|--------|-----------------|
-| `core` | code-style |
-| `io` | code-style, design-patterns |
-| `storage` | code-style, design-patterns |
-| `object` | code-style, design-patterns |
-| `rpc` | code-style, design-patterns |
-| `servers` | code-style, design-patterns |
-| `mcp` | code-style, design-patterns, code-review |
-| `secrets` | code-style, design-patterns, code-review |
-| `tooling` | code-style, design-patterns, testing |
-| `testing` | code-style, testing |
-| `documentation` | code-style, documentation |
-| `delivery` | code-style, ship-it, testing |
+| Layer | Path | Role |
+|-------|------|------|
+| Shared packages | `.cursor/skills/code-style/`, `design-patterns/`, … | Cross-cutting practice (formatting, factories, security review) |
+| Domain skills | `.cursor/skills/storage/`, `io/`, `secrets/`, … | Domain-only rules in `SKILL.md` |
+| Sidecars | Same folder as domain `SKILL.md` (e.g. `mcp/tools-sessions.md`) | Auto-merged by `merge_skill_content` at inject |
+| Registry | `.cursor/domains.yaml` | Lists `SKILL.md` paths only — **not** sidecar paths |
 
-Example: `# @!tooling` on `axiompy/aal/install.py` injects code-style + design-patterns + testing skills.
+### How composition works
+
+1. `# @!storage` on a file selects the **storage** domain.
+2. `domains.yaml` lists shared packages plus `.cursor/skills/storage/SKILL.md`.
+3. Resolve loads each listed `SKILL.md` and **automatically appends** other `*.md` files in that folder (sidecars).
+4. Domain skill text should be **domain-only** — shared factory/settings rules live in `design-patterns`, not repeated in domain files.
+
+Example registry entry:
+
+```yaml
+storage:
+  skills:
+    - .cursor/skills/code-style/SKILL.md
+    - .cursor/skills/design-patterns/SKILL.md
+    - .cursor/skills/storage/SKILL.md   # sql.md sidecar auto-included
+```
+
+Injected paths for `# @!storage` on `axiompy/io/database.py`:
+
+```
+.cursor/skills/code-style/SKILL.md
+.cursor/skills/design-patterns/SKILL.md
+.cursor/skills/storage/SKILL.md  (+ storage/sql.md merged inside)
+```
+
+### Domain → composition matrix
+
+| Domain | Shared packages | Domain folder |
+|--------|-----------------|---------------|
+| `core` | code-style | `core/` |
+| `io` | code-style, design-patterns | `io/` |
+| `storage` | code-style, design-patterns | `storage/` |
+| `object` | code-style, design-patterns | `object/` |
+| `rpc` | code-style, design-patterns | `rpc/` |
+| `servers` | code-style, design-patterns | `servers/` |
+| `mcp` | code-style, design-patterns, code-review | `mcp/` |
+| `secrets` | code-style, design-patterns, code-review | `secrets/` |
+| `tooling` | code-style, design-patterns, testing | `tooling/` |
+| `testing` | code-style | `testing/` |
+| `documentation` | code-style | `documentation/` |
+| `delivery` | code-style, ship-it, testing | `delivery/` |
 
 > **FIXME:** `io` is intentionally broad (HTTP, files, serialization, web). Split into `http`, `file`, and `serialization` domains later.
 
-Skill packages live under `.cursor/skills/<name>/SKILL.md` (ingredients, not annotation targets).
+Source of truth: `bundles/axiompy_skills/` (synced to `.cursor/skills/` on install).
 
 ## Templates package
 
@@ -66,6 +98,7 @@ AAL install templates ship in `bundles/axiompy_aal_templates/` (wheel-bundled as
 1. **Registry host:** `.cursor/` first; future host-agnostic `.axiompy/` extraction documented in [HLD.md](./HLD.md) §7.
 2. **Skills format:** Cursor `SKILL.md` folder trees (not flat `.md` files).
 3. **CLI surface:** Extend `axiompy-skills` rather than a separate `axiompy-aal` entry point.
+4. **Composition:** `domains.yaml` playlists shared + domain `SKILL.md` paths; sidecars auto-merge — no in-file includes.
 
 ## Source of truth
 

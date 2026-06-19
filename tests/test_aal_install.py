@@ -45,6 +45,7 @@ def test_install_hooks_writes_registry(tmp_path: Path):
     domains_text = (_cursor(root) / "domains.yaml").read_text(encoding="utf-8")
     assert "tooling:" in domains_text
     assert "design-patterns" in domains_text
+    assert "sql.md" not in domains_text
     assert (_cursor(root) / "aal.yaml").is_file()
     assert (_cursor(root) / "bootstrap.yaml").is_file()
     assert (skills_dest / "testing" / "SKILL.md").is_file()

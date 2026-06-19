@@ -71,6 +71,35 @@ def test_resolve_edit_errors(tmp_path: Path):
         resolve_edit(root, "bad.py")
 
 
+def test_resolve_composes_skill_md_without_duplicate_sidecar_paths(tmp_path: Path):
+    root = tmp_path
+    cursor = cursor_dir(root)
+    setup_minimal_repo(
+        root,
+        domains={
+            "storage": [
+                f"{_CURSOR_DIR}/skills/code-style/SKILL.md",
+                f"{_CURSOR_DIR}/skills/storage/SKILL.md",
+            ],
+        },
+    )
+    write_skill = cursor / "skills"
+    (write_skill / "code-style").mkdir(parents=True, exist_ok=True)
+    (write_skill / "code-style" / "SKILL.md").write_text("# Style\n", encoding="utf-8")
+    storage = write_skill / "storage"
+    storage.mkdir(parents=True, exist_ok=True)
+    (storage / "SKILL.md").write_text("# Storage\n", encoding="utf-8")
+    (storage / "sql.md").write_text("UNIQUE_SQL_MARKER\n", encoding="utf-8")
+
+    src = root / "db.py"
+    src.write_text("# @!storage\n", encoding="utf-8")
+    payload = resolve_edit(root, "db.py")
+    paths = [s["path"] for s in payload["skills"]]
+    assert paths.count(f"{_CURSOR_DIR}/skills/storage/SKILL.md") == 1
+    assert not any(p.endswith("/sql.md") for p in paths)
+    assert payload["content"].count("UNIQUE_SQL_MARKER") == 1
+
+
 def test_cmd_resolve_json_and_text(tmp_path: Path, capsys):
     root = tmp_path
     setup_minimal_repo(root)

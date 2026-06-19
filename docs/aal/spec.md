@@ -289,6 +289,8 @@ domains:
 
 Multiple skills per domain are first-class. Inject-on-edit loads all listed skills for the effective domain annotation.
 
+**AxiomPy composition (v1.3):** List only `SKILL.md` paths in `domains.yaml`. Shared cross-cutting packages (`code-style`, `design-patterns`, …) are composed alongside domain folders (`storage/`, `io/`, …). Other `*.md` files in the same folder as a listed `SKILL.md` are **sidecars** — merged automatically by `merge_skill_content` at inject. Do not list sidecar paths in the registry (duplicate load). There is no `@include` directive inside skill markdown. See [axiompy-mapping.md](./axiompy-mapping.md).
+
 Skill documents SHOULD specify expected imports and libraries (e.g. preferred crypto packages). Alignment between code and skill guidance is validated by tooling over time (see implementation backlog) — not by guard predicates in source.
 
 ### 5.1 Skill overrides (repo-only, never overwritten)
