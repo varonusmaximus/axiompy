@@ -3,7 +3,9 @@
   "hooks": {
     "preToolUse": [
       {
-        "command": ".cursor/hooks/aal-inject.sh"
+        "command": ".cursor/hooks/aal-inject.sh",
+        "matcher": "Write|StrReplace",
+        "failClosed": true
       }
     ]
   }

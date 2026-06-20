@@ -8,14 +8,16 @@ alwaysApply: false
 
 # AAL v1.3 Agent Directive
 
-When editing a file with AAL domain annotations (`# @!code-review`, `# @!testing`, etc.):
+When editing a file with AAL domain annotations (`# @!mcp`, `# @!tooling`, etc.):
 
 1. Respect the **effective annotation** at the edit line (file-level or function-level override).
-2. Domain skills live under `.cursor/skills/<domain>/SKILL.md` — hooks inject them automatically on Write/Edit.
+2. **Function domains** (see `.cursor/domains.yaml`) compose shared skill packages plus a domain `SKILL.md`. The inject hook loads them automatically on Write/Edit.
 3. Do not remove or relocate `# @!domain` lines unless explicitly migrating annotations.
-4. After changing domains or skills, run `axiompy-skills verify-domains --strict`.
-5. New files: use `axiompy-skills annotate FILE --domain NAME` or add `# @!domain` at file top.
+4. After changing domains or skills, run `aal verify-domains --strict`.
+5. New files: use `aal annotate FILE --domain NAME` or add `# @!domain` at file top.
 
-**Domains** map to bundled AxiomPy skills: `code-review`, `code-style`, `design-patterns`, `documentation`, `ship-it`, `testing`.
+**Function domains:** `core`, `io`, `storage`, `object`, `rpc`, `servers`, `mcp`, `secrets`, `tooling`, `testing`, `documentation`, `delivery`.
 
-If inject fails (unknown domain, missing skill), fix the registry with `axiompy-skills install --project --hooks` or `axiompy-skills doctor --strict`.
+**Shared packages** (composed at inject, not annotation names): `code-style`, `design-patterns`, `code-review`, `ship-it`.
+
+If inject fails (unknown domain, missing skill), fix the registry with `aal install --project --hooks` or `aal doctor --strict`.

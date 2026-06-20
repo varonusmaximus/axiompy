@@ -12,11 +12,7 @@ warn_if_domains_count_gt: 1
 path_hints:
   - glob: "tests/**"
     domain: testing
-  - glob: "axiompy/aal/**"
-    domain: tooling
   - glob: "axiompy/cli/**"
-    domain: tooling
-  - glob: "bundles/axiompy_aal_templates/**"
     domain: tooling
   - glob: "axiompy/secrets/**"
     domain: secrets

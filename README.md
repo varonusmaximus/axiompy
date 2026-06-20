@@ -45,7 +45,7 @@ pip install "axiompy[all]"       # io + servers + data + agents wheels
 1. **`pip install axiompy`** (or an editable install from [Local development](#local-development)) installs the library and registers **`axiompy-skills` on your `PATH`** (see [`pyproject.toml`](pyproject.toml) `[project.scripts]`).
 2. **Sync skills:** from a repository working tree run **`axiompy-skills --project`** to install under `<cwd>/.cursor/skills/`; run **`axiompy-skills`** alone to sync to the resolved default (often `~/.cursor/skills`). Use **`axiompy-skills --show-config`** to print the resolved parent and config source without writing files.
 3. **Conventions** (review, style, design patterns, testing) live in those skill trees. [`AGENTS.md`](AGENTS.md) is a short workspace pointer; historical prose is in [`docs/ARCHIVED_AGENTS.md`](docs/ARCHIVED_AGENTS.md).
-4. **AAL (domain annotations + inject):** see [`docs/aal/HLD.md`](docs/aal/HLD.md) and run `axiompy-skills install --project --hooks` to provision registry, hooks, and CI templates.
+4. **AAL (domain annotations + inject):** install [`axiom-aal`](https://github.com/varonusmaximus/axiom-aal) (`pip install axiom-aal`), sync skills with `axiompy-skills --project`, then `aal install --project --hooks --force`. See [axiom-aal docs](https://github.com/varonusmaximus/axiom-aal/tree/main/docs).
 
 ### Documentation index (agents)
 
@@ -53,7 +53,7 @@ Use this list to jump to the README for the area you are changing.
 
 | Topic | README |
 |-------|--------|
-| **AAL** (annotations, inject, CI) | [`docs/aal/HLD.md`](docs/aal/HLD.md) · [`docs/aal/README.md`](docs/aal/README.md) |
+| **AAL** (annotations, inject, CI) | [axiom-aal](https://github.com/varonusmaximus/axiom-aal) · `aal` CLI |
 | Package map (flat modules + links to subpackages) | [`axiompy/README.md`](axiompy/README.md) |
 | I/O | [`axiompy/io/README.md`](axiompy/io/README.md) |
 | Servers | [`axiompy/servers/README.md`](axiompy/servers/README.md) |
@@ -137,3 +137,16 @@ axiompy-skills --project       # force <cwd>/.cursor/skills/
 ## License
 
 MIT (see `pyproject.toml`).
+
+
+## Two-repo bootstrap (AAL + skills)
+
+| Command | Package |
+|---------|---------|
+| `axiompy-skills --project` | Skill content → `.cursor/skills/` |
+| `aal install --project --hooks --force` | Hooks, CI, `aal.yaml` template |
+| `aal doctor --strict` / `aal verify-domains --strict` | [axiom-aal](https://github.com/varonusmaximus/axiom-aal) |
+
+Committed in axiompy: `.cursor/domains.yaml`, `.cursor/bootstrap.yaml`, `# @!domain` annotations.
+
+> **Note:** Branch `varona/aal-v1.3-merge` is superseded by this split — AAL engine work continues in `axiom-aal` only.

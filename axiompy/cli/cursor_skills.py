@@ -1,10 +1,9 @@
 # @!tooling
 
 """
-Sync bundled Cursor skills and AAL tooling to the local filesystem.
+Sync bundled Cursor skills to the local filesystem.
 
-Copies **SKILL.md trees** from ``axiompy_skills`` and optionally installs AAL
-registry, hooks, and CI templates via ``install --project --hooks``.
+Copies **SKILL.md trees** from ``axiompy_skills`` into a skills parent directory.
 
 Destination precedence (highest first):
 
@@ -15,15 +14,8 @@ Destination precedence (highest first):
    ``cwd`` — key ``destination``: ``global``, ``project``, or an absolute path string.
 5. Default: ``~/.cursor/skills``.
 
-Usage::
-
-    axiompy-skills --show-config
-    axiompy-skills --project
-    axiompy-skills install --project --hooks
-    axiompy-skills verify-domains --strict
-    axiompy-skills resolve --file PATH --line N --json
-    axiompy-skills bootstrap suggest
-    axiompy-skills doctor --strict
+AAL (domain annotations, inject, hooks) lives in the separate ``axiom-aal`` package.
+Use ``pip install axiom-aal`` and the ``aal`` CLI.
 """
 
 from __future__ import annotations
@@ -258,74 +250,20 @@ def _add_sync_flags(parser: argparse.ArgumentParser) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    return argparse.ArgumentParser(
         prog="axiompy-skills",
-        description=(
-            "Sync bundled AxiomPy Cursor SKILL.md trees and AAL domain tooling. "
-            "Run without a subcommand to sync skills only."
-        ),
+        description="Sync bundled AxiomPy Cursor SKILL.md trees to the filesystem.",
     )
-    _add_sync_flags(parser)
-
-    sub = parser.add_subparsers(dest="command")
-
-    install = sub.add_parser("install", help="Sync skills + AAL registry, hooks, CI templates")
-    install.add_argument("--project", action="store_true", help="Install under <cwd>/.cursor/")
-    install.add_argument("--hooks", action="store_true", help="Install hooks and aal.mdc rule")
-    install.add_argument("--no-ci", action="store_true", help="Skip CI workflow template")
-    install.add_argument("--force", action="store_true", help="Overwrite existing config files")
-    install.add_argument("--dry-run", action="store_true")
-
-    upgrade = sub.add_parser(
-        "upgrade", help="Re-apply manifest-managed paths after package upgrade"
-    )
-    upgrade.add_argument("--force", action="store_true")
-    upgrade.add_argument("--dry-run", action="store_true")
-
-    verify = sub.add_parser("verify-domains", help="Verify @!domain annotations resolve to skills")
-    verify.add_argument("--strict", action="store_true")
-    verify.add_argument("--files", nargs="+", default=None, help="Only check these paths")
-
-    resolve = sub.add_parser("resolve", help="Resolve domains and skill content for inject")
-    resolve.add_argument("--file", required=True)
-    resolve.add_argument("--line", type=int, default=None)
-    resolve.add_argument("--json", action="store_true")
-
-    bootstrap = sub.add_parser("bootstrap", help="Bootstrap file-level annotations")
-    boot_sub = bootstrap.add_subparsers(dest="bootstrap_cmd", required=True)
-    boot_sub.add_parser("suggest", help="Suggest domains for unannotated P0 files")
-    apply_p = boot_sub.add_parser("apply", help="Apply file-level annotations")
-    apply_p.add_argument("--level", choices=["file"], default="file")
-    apply_p.add_argument(
-        "--apply", action="store_true", help="Write annotations (default: dry-run)"
-    )
-    migrate_p = boot_sub.add_parser(
-        "migrate", help="Replace existing file-level annotations from path hints"
-    )
-    migrate_p.add_argument(
-        "--apply", action="store_true", help="Write annotations (default: dry-run)"
-    )
-
-    annotate = sub.add_parser("annotate", help="Add file-level @!domain to an existing file")
-    annotate.add_argument("file")
-    annotate.add_argument("--domain", required=True)
-    annotate.add_argument("--dry-run", action="store_true")
-
-    doctor = sub.add_parser("doctor", help="Verify AAL installation health")
-    doctor.add_argument("--strict", action="store_true")
-
-    return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _build_parser()
+    _add_sync_flags(parser)
     args = parser.parse_args(argv)
     cwd = Path.cwd()
-
     if args.version:
         print(f"axiompy {_axiompy_version()}")
         return 0
-
     if args.list_only:
         bundle = skills_bundle_root()
         skills = list_skills(bundle)
@@ -333,66 +271,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         for s in skills:
             print(f"  - {s}")
         return 0
-
-    if args.command is None:
-        return _run_sync(args, cwd)
-
-    root = cwd.resolve()
-
-    if args.command == "install":
-        from axiompy.aal.install import InstallOptions, cmd_install
-
-        dest, _ = resolve_skills_destination(cwd=cwd, dest=None, project=args.project)
-        opts = InstallOptions(
-            root=root,
-            project=args.project,
-            hooks=args.hooks,
-            ci=not args.no_ci,
-            force=args.force,
-            dry_run=args.dry_run,
-        )
-        return cmd_install(opts, skills_dest=dest if args.project else None)
-
-    if args.command == "upgrade":
-        from axiompy.aal.install import cmd_upgrade
-
-        return cmd_upgrade(root, force=args.force, dry_run=args.dry_run)
-
-    if args.command == "verify-domains":
-        from axiompy.aal.verify import cmd_verify_domains
-
-        return cmd_verify_domains(root, args.strict, files=args.files)
-
-    if args.command == "resolve":
-        from axiompy.aal.resolve import cmd_resolve
-
-        return cmd_resolve(root, args.file, line=args.line, as_json=args.json)
-
-    if args.command == "bootstrap":
-        from axiompy.aal.bootstrap import (
-            cmd_bootstrap_apply,
-            cmd_bootstrap_migrate,
-            cmd_bootstrap_suggest,
-        )
-
-        if args.bootstrap_cmd == "suggest":
-            return cmd_bootstrap_suggest(root)
-        if args.bootstrap_cmd == "migrate":
-            return cmd_bootstrap_migrate(root, dry_run=not args.apply)
-        return cmd_bootstrap_apply(root, level=args.level, dry_run=not args.apply)
-
-    if args.command == "annotate":
-        from axiompy.aal.bootstrap import cmd_annotate
-
-        return cmd_annotate(root, args.file, args.domain, dry_run=args.dry_run)
-
-    if args.command == "doctor":
-        from axiompy.aal.doctor import cmd_doctor
-
-        return cmd_doctor(root, strict=args.strict)
-
-    parser.print_help()
-    return 2
+    return _run_sync(args, cwd)
 
 
 if __name__ == "__main__":

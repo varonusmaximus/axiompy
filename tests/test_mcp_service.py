@@ -24,6 +24,7 @@ from axiompy.servers import (
     MCPToolService,
     MCPToolServiceSettings,
 )
+from axiompy.validators import ValidationError
 
 
 # ============================================================================
@@ -97,6 +98,14 @@ class TestMCPToolServiceSettings:
         assert settings.enable_history is False
         assert settings.max_session_timeout == 7200
 
+    def test_invalid_max_session_timeout(self):
+        """Test max_session_timeout boundary validation."""
+        with pytest.raises(ValidationError, match="max_session_timeout"):
+            MCPToolServiceSettings(max_session_timeout=0)
+
+        with pytest.raises(ValidationError, match="max_session_timeout"):
+            MCPToolServiceSettings(max_session_timeout=86401)
+
 
 # ============================================================================
 # Tests: MCPToolService Initialization
@@ -117,6 +126,46 @@ class TestMCPToolServiceInitialization:
         settings = MCPToolServiceSettings(enable_history=False)
         service = MCPToolService(mock_mcp_server, settings)
         assert service.settings.enable_history is False
+
+    def test_init_rejects_none_mcp_server(self, service_settings):
+        """Test service rejects None mcp_server."""
+        with pytest.raises(ValidationError, match="mcp_server cannot be None"):
+            MCPToolService(None, service_settings)
+
+    def test_init_rejects_none_settings(self, mock_mcp_server):
+        """Test service rejects None settings."""
+        with pytest.raises(ValidationError, match="settings cannot be None"):
+            MCPToolService(mock_mcp_server, None)
+
+    def test_init_rejects_invalid_mcp_server_type(self, service_settings):
+        """Test service rejects non-MCPServer mcp_server."""
+        with pytest.raises(ValidationError, match="mcp_server must be an MCPServer instance"):
+            MCPToolService("not-a-server", service_settings)
+
+    def test_init_rejects_invalid_settings_type(self, mock_mcp_server):
+        """Test service rejects non-MCPToolServiceSettings settings."""
+        with pytest.raises(ValidationError, match="settings must be MCPToolServiceSettings"):
+            MCPToolService(mock_mcp_server, {"enable_history": True})
+
+    def test_init_rejects_uninitialized_server(self, service_settings):
+        """Test service rejects framework servers that have not been initialized."""
+        from axiompy.servers import MCPServer
+
+        class UninitializedServer(MCPServer):
+            def initialize(self):
+                self._initialized = True
+
+            def execute_tool(self, tool_name: str, session, **kwargs):
+                return None
+
+            def shutdown(self):
+                pass
+
+        server = UninitializedServer(MCPServerSettings(name="Uninitialized"))
+        server._initialized = False
+
+        with pytest.raises(ValidationError, match="mcp_server must be initialized"):
+            MCPToolService(server, service_settings)
 
 
 # ============================================================================

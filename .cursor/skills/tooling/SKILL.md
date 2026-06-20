@@ -1,6 +1,6 @@
 ---
 name: tooling
-description: CLI, skills sync, and AAL implementation. Use when editing axiompy.cli or axiompy.aal.
+description: CLI, skills sync, and AAL implementation. Use when editing axiompy.cli or aal.
 ---
 
 # Tooling domain (axiompy)
@@ -9,14 +9,14 @@ Shared **code-style**, **design-patterns**, and **testing** load separately. Thi
 
 ## Scope
 
-`axiompy/cli/**`, `axiompy/aal/**`, `bundles/axiompy_aal_templates/**`, `bundles/axiompy_skills/**`.
+`axiompy/cli/**`, `external axiom-aal package`, `axiom-aal templates via `aal install``, `bundles/axiompy_skills/**`.
 
 ## Tooling-only rules
 
 - CLI subcommands return `int` exit codes (0 = success).
 - AAL modules avoid circular imports — keep `resolve` independent of hook middleware.
-- Template paths must appear in `bundles/axiompy_aal_templates/manifest.json`.
-- New AAL behavior needs tests in `tests/test_aal_*.py` (80% coverage gate).
+- Template paths must appear in `bundles/aal_templates/manifest.json`.
+- New AAL behavior needs tests in `axiom-aal repo tests` (80% coverage gate).
 
 ## Sidecars (auto-included)
 

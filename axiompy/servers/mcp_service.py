@@ -11,6 +11,7 @@ Key Components:
     - Session tracking for HTTP clients
     - Execution history tracking
     - Error handling and validation
+    - And other things to come...
 
 Architecture:
     HTTP Route Handler
@@ -55,8 +56,15 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
+from axiompy.decorators import LogExecutionTime
 from axiompy.loggers import LoggerFactory
 from axiompy.servers.mcp import MCPServer, MCPSession, MCPToolError
+from axiompy.validators import (
+    ValidationError,
+    ensure_in_range,
+    ensure_instance_of,
+    ensure_not_none,
+)
 
 logger = LoggerFactory.create_logger(__name__)
 
@@ -76,6 +84,12 @@ class MCPToolServiceSettings:
 
     def __post_init__(self):
         """Validate settings."""
+        ensure_in_range(
+            self.max_session_timeout,
+            1,
+            86400,
+            f"max_session_timeout {self.max_session_timeout} must be between 1 and 86400",
+        )
         logger.debug("MCPToolServiceSettings validated successfully")
 
 
@@ -109,7 +123,19 @@ class MCPToolService:
         Args:
             mcp_server: MCPServer instance providing tools
             settings: Service configuration
+
+        Raises:
+            ValidationError: If arguments are invalid or the server is not initialized
         """
+        ensure_not_none(mcp_server, "mcp_server cannot be None")
+        ensure_instance_of(mcp_server, MCPServer, "mcp_server must be an MCPServer instance")
+        ensure_not_none(settings, "settings cannot be None")
+        ensure_instance_of(
+            settings, MCPToolServiceSettings, "settings must be MCPToolServiceSettings"
+        )
+        if hasattr(mcp_server, "_initialized") and not mcp_server._initialized:
+            raise ValidationError("mcp_server must be initialized before creating MCPToolService")
+
         self.mcp_server = mcp_server
         self.settings = settings
         self.http_sessions: Dict[str, MCPSession] = {}
@@ -120,6 +146,7 @@ class MCPToolService:
     # Session Management
     # ========================================================================
 
+    @LogExecutionTime(logger, message_template="create_session completed in {elapsed:.4f}s")
     def create_session(self, client_id: Optional[str] = None) -> str:
         """
         Create a new HTTP session.

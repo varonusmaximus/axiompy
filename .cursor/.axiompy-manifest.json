@@ -27,9 +27,19 @@
   "skills": [
     "code-review",
     "code-style",
+    "core",
+    "delivery",
     "design-patterns",
     "documentation",
+    "io",
+    "mcp",
+    "object",
+    "rpc",
+    "secrets",
+    "servers",
     "ship-it",
-    "testing"
+    "storage",
+    "testing",
+    "tooling"
   ]
 }

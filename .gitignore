@@ -19,6 +19,7 @@ scripts/purge_axiompy_git_history.sh
 
 # Ignore log files and directories
 logs/
+.cursor/logs/
 *.log
 
 # Ignore virtual environment directories

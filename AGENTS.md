@@ -2,7 +2,7 @@
 
 ## Where the rules live
 
-1. **Cursor skills** — Install or refresh with `axiompy-skills --project` from repo root so `./.cursor/skills/` matches the shipped bundle. **Canonical** depth for design, review, style, docs, and testing is in those `SKILL.md` files and their sidecars.
+1. **Cursor skills** — Install or refresh with `axiompy-skills --project`. **AAL** (hooks, verify, inject) uses the separate `axiom-aal` package: `pip install axiom-aal` then `aal install --project --hooks --force`. from repo root so `./.cursor/skills/` matches the shipped bundle. **Canonical** depth for design, review, style, docs, and testing is in those `SKILL.md` files and their sidecars.
 2. **`.cursor/rules/*.mdc`** — Workflow and repo gates only (e.g. branch-first). Not a duplicate of the full style guide.
 3. **History** — [`docs/ARCHIVED_AGENTS.md`](docs/ARCHIVED_AGENTS.md) holds the old monolithic ruleset for reference only.
 
